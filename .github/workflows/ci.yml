@@ -11,7 +11,7 @@ jobs:
     name: Lint (Python)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
@@ -26,7 +26,7 @@ jobs:
     name: Type check (mypy)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
@@ -42,7 +42,7 @@ jobs:
       matrix:
         python-version: ["3.12"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
@@ -55,7 +55,7 @@ jobs:
     name: Rust checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -73,7 +73,7 @@ jobs:
     name: Docs check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Check required docs exist
         run: |
           for f in docs/00-overview.md docs/01-vision.md docs/02-architecture.md \
