@@ -3,6 +3,7 @@ import { designGuides, findOffTargets } from "@/lib/crisprApi";
 import { createExperiment } from "@/lib/projectsApi";
 import { GuideList } from "@/components/GuideList";
 import { OffTargetList } from "@/components/OffTargetList";
+import { FastaUploadButton } from "@/components/FastaUploadButton";
 import type { Guide } from "@/types/guide";
 import type { OffTargetResult } from "@/types/offtarget";
 
@@ -24,6 +25,7 @@ export function CrisprPanel({ projectId, onExperimentSaved }: Props) {
   const [guides, setGuides] = useState<Guide[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fastaInfo, setFastaInfo] = useState<string | null>(null);
 
   const [selectedGuide, setSelectedGuide] = useState<string | null>(null);
   const [reference, setReference] = useState(OFF_TARGET_REF);
@@ -46,9 +48,7 @@ export function CrisprPanel({ projectId, onExperimentSaved }: Props) {
       if (projectId !== null && result.length > 0) {
         try {
           const title = String(result.length) + " gRNAs for " + seq.slice(0, 20) + "...";
-          await createExperiment(projectId, "crispr_design", title, {
-            guides: result,
-          });
+          await createExperiment(projectId, "crispr_design", title, { guides: result });
           if (onExperimentSaved) onExperimentSaved();
         } catch (persistErr) {
           console.warn("Failed to save crispr experiment:", persistErr);
@@ -60,6 +60,23 @@ export function CrisprPanel({ projectId, onExperimentSaved }: Props) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleFasta(records: { name: string; sequence: string }[]) {
+    const first = records[0];
+    if (!first) return;
+
+    setSequence(first.sequence);
+    setFastaInfo(
+      "Loaded " + records.length + " record(s). Using: " + first.name +
+      " (" + first.sequence.length + " nt)"
+    );
+
+    const second = records[1];
+    if (second) {
+      setReference(second.sequence);
+    }
+    setTimeout(() => setFastaInfo(null), 5000);
   }
 
   async function checkOffTarget() {
@@ -103,7 +120,11 @@ export function CrisprPanel({ projectId, onExperimentSaved }: Props) {
   return (
     <div className="crispr-panel">
       <div className="crispr-input">
-        <label>Target DNA sequence (ACGT):</label>
+        <div className="crispr-input-head">
+          <label>Target DNA sequence (ACGT):</label>
+          <FastaUploadButton onLoad={handleFasta} />
+        </div>
+        {fastaInfo && <div className="fasta-info">✓ {fastaInfo}</div>}
         <textarea
           value={sequence}
           onChange={(e) => setSequence(e.target.value)}

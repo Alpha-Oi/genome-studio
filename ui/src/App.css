@@ -61,7 +61,6 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   font-size: 11px; color: #666;
 }
 
-/* Toast */
 .toast {
   position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
   background: #2a5a2a; color: #b8e0b8;
@@ -76,10 +75,7 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* CenterTabs */
-.center-tabs {
-  display: flex; flex-direction: column; gap: 0; height: 100%;
-}
+.center-tabs { display: flex; flex-direction: column; gap: 0; height: 100%; }
 .tabs-bar {
   display: flex; gap: 2px;
   border-bottom: 1px solid #333;
@@ -98,10 +94,8 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 .tabs-bar .tab.active {
   color: #aac8ee; border-bottom-color: #4a8ac8;
 }
-.tabs-bar .tab-label { display: inline; }
 .tabs-body { flex: 1; overflow: auto; }
 
-/* GoalTemplates */
 .goal-templates {
   display: flex; gap: 4px; flex-wrap: wrap; align-items: center;
   margin-bottom: 8px;
@@ -119,7 +113,6 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 }
 .goal-template-btn:hover { background: #3a4a6a; }
 
-/* Chat */
 .chat-panel { display: flex; flex-direction: column; gap: 12px; height: 100%; }
 .chat-input { display: flex; flex-direction: column; gap: 6px; }
 .chat-input textarea {
@@ -147,7 +140,6 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
 }
 
-/* Plan */
 .plan-card {
   padding: 12px; background: #232323; border: 1px solid #333;
   border-radius: 6px; display: flex; flex-direction: column; gap: 10px;
@@ -188,9 +180,12 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   border-top: 1px solid #333; padding-top: 8px;
 }
 
-/* CRISPR / Simulation */
 .crispr-panel { display: flex; flex-direction: column; gap: 12px; }
 .crispr-input { display: flex; flex-direction: column; gap: 6px; }
+.crispr-input-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+}
 .crispr-input label { font-size: 12px; color: #888; }
 .crispr-input textarea {
   width: 100%; padding: 8px;
@@ -206,6 +201,24 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 }
 .crispr-input button:hover:not(:disabled) { background: #3a6a9a; }
 .crispr-input button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.fasta-upload { display: inline-flex; align-items: center; gap: 8px; }
+.fasta-btn {
+  padding: 3px 10px; font-size: 11px;
+  background: #2a3a2a; color: #b8e0b8;
+  border: 1px solid #3a4a3a; border-radius: 4px;
+  cursor: pointer;
+}
+.fasta-btn:hover:not(:disabled) { background: #3a4a3a; }
+.fasta-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.fasta-error {
+  font-size: 11px; color: #ffb0b0;
+}
+.fasta-info {
+  font-size: 11px; color: #88d888;
+  padding: 3px 8px; background: rgba(136, 216, 136, 0.08);
+  border-radius: 3px;
+}
 
 .guide-selector { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
 .guide-selector label { font-size: 12px; color: #888; }
@@ -254,7 +267,6 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   font-size: 12px; color: #666; padding: 8px 0; margin: 0;
 }
 
-/* Simulation panel */
 .sim-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
@@ -315,7 +327,6 @@ details summary {
   cursor: pointer; color: #888; font-size: 12px; padding: 4px 0;
 }
 
-/* Consequence tree */
 .consequence-node {
   border-left: 1px solid #333;
   padding-left: 8px;
@@ -338,7 +349,6 @@ details summary {
 .cdesc { flex: 1; color: #d8d8d8; }
 .cconf { font-size: 11px; color: #888; }
 
-/* Projects panel */
 .project-create {
   display: flex; gap: 4px; margin-bottom: 10px;
 }
@@ -376,7 +386,6 @@ details summary {
 }
 .project-list .pdelete:hover { color: #ff8888; }
 
-/* Experiments panel */
 .exp-panel-head {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 8px;
@@ -425,7 +434,6 @@ details summary {
   font-size: 10px; color: #666;
 }
 
-/* Warnings panel */
 .warnings-filter {
   display: flex; gap: 4px; margin-bottom: 10px;
 }
@@ -477,7 +485,6 @@ details summary {
   font-style: italic;
 }
 
-/* Sequencing / chromatogram */
 .chromatogram-wrap {
   padding: 8px; background: #1a1a1a; border-radius: 4px;
   overflow-x: auto;
