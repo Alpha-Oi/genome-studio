@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![Rust](https://img.shields.io/badge/rust-1.82%2B-orange.svg)](https://www.rust-lang.org/)
 [![Node](https://img.shields.io/badge/node-24%2B-green.svg)](https://nodejs.org/)
-[![License](https://img.shields.io/badge/license-see%20LICENSE-lightgrey.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 > Workbench для исследователей генной инженерии: цель на естественном языке превращается в стратегию, план, дизайн gRNA, симуляцию и PDF-отчёт.
 
