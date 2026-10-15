@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { simulateEdit } from "@/lib/simulationApi";
+import { downloadFasta, downloadGenbank, downloadVcf } from "@/lib/exportApi";
 import { ConsequenceTree } from "@/components/ConsequenceTree";
 import type { SimulateEditResponse } from "@/types/simulation";
 
@@ -22,6 +23,18 @@ export function SimulationPanel({ projectId, onSimulated }: Props) {
   const [result, setResult] = useState<SimulateEditResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState<string | null>(null);
+
+  function currentExportReq() {
+    return {
+      sequence: sequence.trim(),
+      gene_name: geneName,
+      kind,
+      position,
+      ref: kind === "insertion" ? "" : ref,
+      alt: kind === "deletion" ? "" : alt,
+    };
+  }
 
   async function submit() {
     if (loading) return;
@@ -29,12 +42,7 @@ export function SimulationPanel({ projectId, onSimulated }: Props) {
     setError(null);
     try {
       const r = await simulateEdit({
-        sequence: sequence.trim(),
-        gene_name: geneName,
-        kind,
-        position,
-        ref: kind === "insertion" ? "" : ref,
-        alt: kind === "deletion" ? "" : alt,
+        ...currentExportReq(),
         project_id: projectId ?? undefined,
       });
       setResult(r);
@@ -46,6 +54,21 @@ export function SimulationPanel({ projectId, onSimulated }: Props) {
       setResult(null);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function doExport(kindName: "fasta" | "vcf" | "genbank") {
+    setExporting(kindName);
+    setError(null);
+    try {
+      const req = currentExportReq();
+      if (kindName === "fasta") await downloadFasta(req);
+      else if (kindName === "vcf") await downloadVcf(req);
+      else await downloadGenbank(req);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setExporting(null);
     }
   }
 
@@ -101,9 +124,31 @@ export function SimulationPanel({ projectId, onSimulated }: Props) {
         </label>
       </div>
 
-      <div className="crispr-input">
+      <div className="sim-actions">
         <button onClick={() => void submit()} disabled={loading}>
           {loading ? "…" : "Simulate"}
+        </button>
+        <span className="sim-actions-label">Export:</span>
+        <button
+          className="export-btn"
+          onClick={() => void doExport("fasta")}
+          disabled={exporting !== null}
+        >
+          {exporting === "fasta" ? "…" : "FASTA"}
+        </button>
+        <button
+          className="export-btn"
+          onClick={() => void doExport("vcf")}
+          disabled={exporting !== null}
+        >
+          {exporting === "vcf" ? "…" : "VCF"}
+        </button>
+        <button
+          className="export-btn"
+          onClick={() => void doExport("genbank")}
+          disabled={exporting !== null}
+        >
+          {exporting === "genbank" ? "…" : "GenBank"}
         </button>
       </div>
 

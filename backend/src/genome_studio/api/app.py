@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,6 +25,7 @@ from genome_studio.data import (
     list_experiments,
     list_projects,
 )
+from genome_studio.export import edit_to_vcf, to_fasta, to_genbank
 from genome_studio.intent.parser import ParseError, parse_goal
 from genome_studio.knowledge.seed import build_default_kg
 from genome_studio.reasoning.mapper import map_goal
@@ -94,9 +95,20 @@ class SimulateEditRequest(BaseModel):
 
 class SimulateEditResponse(BaseModel):
     edited_sequence: str
+    original_sequence: str
     effect: dict
     consequence_tree: dict
     warning_ids: list[int] = []
+    edit: dict
+
+
+class ExportEditRequest(BaseModel):
+    sequence: str = Field(..., min_length=10, max_length=100_000)
+    gene_name: str = Field("gene", max_length=64)
+    kind: str
+    position: int = Field(..., ge=0)
+    ref: str = Field("", max_length=1000)
+    alt: str = Field("", max_length=1000)
 
 
 class ProjectCreate(BaseModel):
@@ -145,6 +157,22 @@ class AcknowledgeRequest(BaseModel):
 def _clean_dna(seq: str) -> str:
     seq = seq.upper()
     return "".join(b for b in seq if b in "ACGTN")
+
+
+def _parse_edit(req) -> Edit:
+    try:
+        kind = EditKind(req.kind)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=422,
+            detail=f"kind must be substitution|insertion|deletion, got {req.kind!r}",
+        ) from e
+    return Edit(
+        kind=kind,
+        position=req.position,
+        ref=req.ref.upper(),
+        alt=req.alt.upper(),
+    )
 
 
 # --- App factory ---------------------------------------------------------
@@ -270,15 +298,7 @@ def create_app() -> FastAPI:
         if not seq:
             raise HTTPException(status_code=422, detail="empty sequence")
 
-        try:
-            kind = EditKind(req.kind)
-        except ValueError as e:
-            raise HTTPException(
-                status_code=422,
-                detail=f"kind must be substitution|insertion|deletion, got {req.kind!r}",
-            ) from e
-
-        edit = Edit(kind=kind, position=req.position, ref=req.ref.upper(), alt=req.alt.upper())
+        edit = _parse_edit(req)
 
         try:
             edited = apply_edit(seq, edit)
@@ -304,9 +324,76 @@ def create_app() -> FastAPI:
 
         return SimulateEditResponse(
             edited_sequence=edited,
+            original_sequence=seq,
             effect=effect.to_dict(),
             consequence_tree=tree.to_dict(),
             warning_ids=warning_ids,
+            edit=edit.to_dict(),
+        )
+
+    # --- Export --------------------------------------------------------
+
+    @app.post("/export/edit/fasta")
+    async def export_fasta(req: ExportEditRequest) -> Response:
+        seq = _clean_dna(req.sequence)
+        if not seq:
+            raise HTTPException(status_code=422, detail="empty sequence")
+        edit = _parse_edit(req)
+        try:
+            edited = apply_edit(seq, edit)
+        except EditError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+        content = to_fasta(edited, header=f"{req.gene_name}_edited")
+        return Response(
+            content=content,
+            media_type="text/x-fasta",
+            headers={
+                "Content-Disposition": f'attachment; filename="{req.gene_name}_edited.fasta"'
+            },
+        )
+
+    @app.post("/export/edit/vcf")
+    async def export_vcf(req: ExportEditRequest) -> Response:
+        seq = _clean_dna(req.sequence)
+        if not seq:
+            raise HTTPException(status_code=422, detail="empty sequence")
+        edit = _parse_edit(req)
+        # validate edit applies
+        try:
+            apply_edit(seq, edit)
+        except EditError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+        content = edit_to_vcf(edit, ref_len=len(seq), gene_name=req.gene_name)
+        return Response(
+            content=content,
+            media_type="text/vcf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{req.gene_name}_edit.vcf"'
+            },
+        )
+
+    @app.post("/export/edit/genbank")
+    async def export_genbank(req: ExportEditRequest) -> Response:
+        seq = _clean_dna(req.sequence)
+        if not seq:
+            raise HTTPException(status_code=422, detail="empty sequence")
+        edit = _parse_edit(req)
+        try:
+            edited = apply_edit(seq, edit)
+        except EditError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+        content = to_genbank(
+            edited,
+            locus=req.gene_name[:16],
+            definition=f"{req.gene_name} with {edit.kind.value} at {edit.position}",
+            organism="synthetic",
+        )
+        return Response(
+            content=content,
+            media_type="text/plain",
+            headers={
+                "Content-Disposition": f'attachment; filename="{req.gene_name}_edited.gb"'
+            },
         )
 
     # --- Projects ------------------------------------------------------
