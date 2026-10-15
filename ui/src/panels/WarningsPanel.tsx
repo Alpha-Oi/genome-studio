@@ -4,9 +4,10 @@ import type { Warning } from "@/types/warning";
 
 interface Props {
   projectId: number | null;
+  refreshKey?: number;
 }
 
-export function WarningsPanel({ projectId }: Props) {
+export function WarningsPanel({ projectId, refreshKey = 0 }: Props) {
   const [warnings, setWarnings] = useState<Warning[]>([]);
   const [filter, setFilter] = useState<"all" | "open" | "acknowledged">("open");
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export function WarningsPanel({ projectId }: Props) {
   useEffect(() => {
     void refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId, filter]);
+  }, [projectId, filter, refreshKey]);
 
   async function ack(id: number) {
     const note = prompt("Reason for acknowledging this warning:");

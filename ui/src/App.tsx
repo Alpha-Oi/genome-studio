@@ -14,6 +14,11 @@ import "./App.css";
 export function App() {
   const build = getBuildInfo();
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [warningsRefreshKey, setWarningsRefreshKey] = useState(0);
+
+  function bumpWarnings() {
+    setWarningsRefreshKey((k) => k + 1);
+  }
 
   return (
     <div className="app">
@@ -36,12 +41,21 @@ export function App() {
         <section className="app-center">
           <BrowserPanel />
           <CrisprPanel />
-          <SimulationPanel projectId={selectedProjectId} />
+          <SimulationPanel
+            projectId={selectedProjectId}
+            onSimulated={bumpWarnings}
+          />
         </section>
 
         <aside className="app-right">
-          <ChatPanel projectId={selectedProjectId} />
-          <WarningsPanel projectId={selectedProjectId} />
+          <ChatPanel
+            projectId={selectedProjectId}
+            onPlanCreated={bumpWarnings}
+          />
+          <WarningsPanel
+            projectId={selectedProjectId}
+            refreshKey={warningsRefreshKey}
+          />
           <DevPanel />
         </aside>
       </main>

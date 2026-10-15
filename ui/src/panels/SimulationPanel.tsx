@@ -7,9 +7,10 @@ const EXAMPLE_SEQ = "ATG" + "GCT".repeat(20) + "TAA";
 
 interface Props {
   projectId: number | null;
+  onSimulated?: () => void;
 }
 
-export function SimulationPanel({ projectId }: Props) {
+export function SimulationPanel({ projectId, onSimulated }: Props) {
   const [sequence, setSequence] = useState(EXAMPLE_SEQ);
   const [geneName, setGeneName] = useState("testGene");
   const [kind, setKind] = useState<"substitution" | "insertion" | "deletion">(
@@ -27,18 +28,19 @@ export function SimulationPanel({ projectId }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const r = await simulateEdit(
-        {
-          sequence: sequence.trim(),
-          gene_name: geneName,
-          kind,
-          position,
-          ref: kind === "insertion" ? "" : ref,
-          alt: kind === "deletion" ? "" : alt,
-          project_id: projectId ?? undefined,
-        },
-      );
+      const r = await simulateEdit({
+        sequence: sequence.trim(),
+        gene_name: geneName,
+        kind,
+        position,
+        ref: kind === "insertion" ? "" : ref,
+        alt: kind === "deletion" ? "" : alt,
+        project_id: projectId ?? undefined,
+      });
       setResult(r);
+      if (projectId !== null && onSimulated) {
+        onSimulated();
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
       setResult(null);

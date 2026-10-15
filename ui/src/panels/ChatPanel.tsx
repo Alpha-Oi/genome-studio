@@ -5,6 +5,7 @@ import type { Plan } from "@/types/plan";
 
 interface Props {
   projectId: number | null;
+  onPlanCreated?: () => void;
 }
 
 interface PlanEntry {
@@ -12,7 +13,7 @@ interface PlanEntry {
   plan: Plan;
 }
 
-export function ChatPanel({ projectId }: Props) {
+export function ChatPanel({ projectId, onPlanCreated }: Props) {
   const [text, setText] = useState("");
   const [plans, setPlans] = useState<PlanEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +29,9 @@ export function ChatPanel({ projectId }: Props) {
       const plan = await fetchPlan(trimmed, projectId ?? undefined);
       setPlans((prev) => [{ id: Date.now(), plan }, ...prev]);
       setText("");
+      if (projectId !== null && onPlanCreated) {
+        onPlanCreated();
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -51,8 +55,8 @@ export function ChatPanel({ projectId }: Props) {
           onKeyDown={onKeyDown}
           placeholder={
             projectId !== null
-              ? 'Goal (warnings will attach to project): "knockout gene lacZ in E. coli"'
-              : 'Example: "knockout gene lacZ in E. coli" (Ctrl+Enter)'
+              ? 'Goal (warnings will attach to project): "knockout gene recA in E. coli"'
+              : 'Example: "knockout gene lacZ in E. coli" — select a project to attach warnings'
           }
           rows={3}
           disabled={loading}

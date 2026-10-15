@@ -49,6 +49,26 @@ def test_goal_with_project_creates_warnings(client, pid):
     assert "essential_gene_risk" in types
 
 
+def test_deduplication_same_goal_twice(client, pid):
+    # Send the same goal twice - should NOT duplicate the open warning
+    r1 = client.post(
+        "/goal",
+        json={"text": "knockout gene recA in E. coli", "project_id": pid},
+    )
+    r2 = client.post(
+        "/goal",
+        json={"text": "knockout gene recA in E. coli", "project_id": pid},
+    )
+    ids1 = r1.json()["warning_ids"]
+    ids2 = r2.json()["warning_ids"]
+    assert ids1 == ids2  # same warning, not new
+
+    listing = client.get(f"/projects/{pid}/warnings?status=open").json()["warnings"]
+    # exactly one essential_gene_risk warning
+    ess = [w for w in listing if w["type"] == "essential_gene_risk"]
+    assert len(ess) == 1
+
+
 def test_goal_without_project_creates_no_warnings(client, pid):
     r = client.post("/goal", json={"text": "knockout gene recA in E. coli"})
     assert r.status_code == 200
@@ -142,6 +162,28 @@ def test_acknowledge_empty_note_fails(client, pid):
         json={"by": "u", "note": "   "},
     )
     assert r2.status_code == 422
+
+
+def test_after_ack_new_warning_can_appear(client, pid):
+    # Send goal, acknowledge, send again -> new warning appears (old one is closed)
+    r1 = client.post(
+        "/goal",
+        json={"text": "knockout gene recA in E. coli", "project_id": pid},
+    )
+    wid1 = r1.json()["warning_ids"][0]
+    client.post(
+        f"/warnings/{wid1}/acknowledge",
+        json={"by": "u", "note": "reviewed"},
+    )
+    r2 = client.post(
+        "/goal",
+        json={"text": "knockout gene recA in E. coli", "project_id": pid},
+    )
+    wid2 = r2.json()["warning_ids"][0]
+    assert wid2 != wid1  # new warning, since old is acknowledged
+
+    listing = client.get(f"/projects/{pid}/warnings?status=open").json()["warnings"]
+    assert any(w["id"] == wid2 for w in listing)
 
 
 def test_filter_by_status(client, pid):

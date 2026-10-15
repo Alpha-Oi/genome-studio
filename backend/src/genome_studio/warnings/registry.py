@@ -32,8 +32,29 @@ async def create_warning(
     message: str,
     evidence: list[str] | None = None,
     experiment_id: int | None = None,
+    dedupe: bool = True,
 ) -> Warning:
-    """Create a new warning attached to a project."""
+    """Create a new warning attached to a project.
+
+    If dedupe is True and there is already an open warning with the same
+    (project_id, type, message) - returns the existing one instead of
+    creating a duplicate.
+    """
+    if dedupe:
+        stmt = (
+            select(Warning)
+            .where(
+                Warning.project_id == project_id,
+                Warning.type == type,
+                Warning.message == message,
+                Warning.status == WarningStatus.OPEN.value,
+            )
+            .limit(1)
+        )
+        existing = (await session.execute(stmt)).scalar_one_or_none()
+        if existing is not None:
+            return existing
+
     w = Warning(
         project_id=project_id,
         experiment_id=experiment_id,
