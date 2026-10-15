@@ -13,6 +13,14 @@ from genome_studio.crispr.offtarget import find_offtargets, off_target_risk
 from genome_studio.intent.parser import ParseError, parse_goal
 from genome_studio.knowledge.seed import build_default_kg
 from genome_studio.reasoning.planner import build_plan
+from genome_studio.simulation import (
+    Edit,
+    EditError,
+    EditKind,
+    apply_edit,
+    build_consequence_tree,
+    predict_effect,
+)
 
 
 # --- Schemas -------------------------------------------------------------
@@ -45,6 +53,21 @@ class OffTargetRequest(BaseModel):
 class OffTargetResponse(BaseModel):
     hits: list[dict]
     summary: dict
+
+
+class SimulateEditRequest(BaseModel):
+    sequence: str = Field(..., min_length=10, max_length=100_000)
+    gene_name: str = Field("gene", max_length=64)
+    kind: str = Field(..., description="substitution | insertion | deletion")
+    position: int = Field(..., ge=0)
+    ref: str = Field("", max_length=1000)
+    alt: str = Field("", max_length=1000)
+
+
+class SimulateEditResponse(BaseModel):
+    edited_sequence: str
+    effect: dict
+    consequence_tree: dict
 
 
 # --- Helpers -------------------------------------------------------------
@@ -139,6 +162,41 @@ def create_app() -> FastAPI:
         return OffTargetResponse(
             hits=[h.to_dict() for h in hits],
             summary=summary,
+        )
+
+    @app.post("/simulate/edit", response_model=SimulateEditResponse)
+    async def simulate_edit(req: SimulateEditRequest) -> SimulateEditResponse:
+        seq = _clean_dna(req.sequence)
+        if not seq:
+            raise HTTPException(status_code=422, detail="empty sequence")
+
+        try:
+            kind = EditKind(req.kind)
+        except ValueError as e:
+            raise HTTPException(
+                status_code=422,
+                detail=f"kind must be substitution|insertion|deletion, got {req.kind!r}",
+            ) from e
+
+        edit = Edit(
+            kind=kind,
+            position=req.position,
+            ref=req.ref.upper(),
+            alt=req.alt.upper(),
+        )
+
+        try:
+            edited = apply_edit(seq, edit)
+        except EditError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+
+        effect = predict_effect(seq, edit)
+        tree = build_consequence_tree(req.gene_name, effect)
+
+        return SimulateEditResponse(
+            edited_sequence=edited,
+            effect=effect.to_dict(),
+            consequence_tree=tree.to_dict(),
         )
 
     return app

@@ -4,6 +4,7 @@ import {
   CrisprPanel,
   DevPanel,
   ProjectsPanel,
+  SimulationPanel,
   WarningsPanel,
 } from "@/panels";
 import { getBuildInfo } from "@/lib/build-info";
@@ -27,6 +28,7 @@ export function App() {
         <section className="app-center">
           <BrowserPanel />
           <CrisprPanel />
+          <SimulationPanel />
         </section>
 
         <aside className="app-right">

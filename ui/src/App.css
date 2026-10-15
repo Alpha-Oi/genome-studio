@@ -13,16 +13,10 @@ body, html, #root {
   height: 100%;
 }
 
-.app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
+.app { display: flex; flex-direction: column; height: 100vh; }
 
 .app-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex; align-items: center; gap: 12px;
   padding: 8px 16px;
   background: #0f0f0f;
   border-bottom: 1px solid #333;
@@ -31,11 +25,8 @@ body, html, #root {
 .app-header h1 { font-size: 16px; margin: 0; }
 
 .build-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #2a4a2a;
-  color: #b8e0b8;
+  font-size: 11px; padding: 2px 8px; border-radius: 4px;
+  background: #2a4a2a; color: #b8e0b8;
 }
 
 .app-main {
@@ -46,26 +37,19 @@ body, html, #root {
 }
 
 .app-sidebar, .app-center, .app-right {
-  overflow: auto;
-  padding: 12px;
-  border-right: 1px solid #333;
+  overflow: auto; padding: 12px; border-right: 1px solid #333;
 }
 
 .app-right { border-right: none; border-left: 1px solid #333; }
 
 .panel {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #232323;
-  border-radius: 6px;
+  margin-bottom: 16px; padding: 12px;
+  background: #232323; border-radius: 6px;
 }
 
 .panel h2 {
-  font-size: 13px;
-  margin: 0 0 8px;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 13px; margin: 0 0 8px;
+  color: #888; text-transform: uppercase; letter-spacing: 0.5px;
 }
 
 .panel p { margin: 0; color: #666; font-size: 12px; }
@@ -74,271 +58,226 @@ body, html, #root {
 .dev-panel h2 { color: #ffb0b0; }
 
 .app-footer {
-  padding: 4px 16px;
-  background: #0f0f0f;
+  padding: 4px 16px; background: #0f0f0f;
   border-top: 1px solid #333;
-  font-size: 11px;
-  color: #666;
+  font-size: 11px; color: #666;
 }
 
-/* --- Chat --- */
-
+/* Chat */
 .chat-panel { display: flex; flex-direction: column; gap: 12px; height: 100%; }
-
 .chat-input { display: flex; flex-direction: column; gap: 6px; }
-
 .chat-input textarea {
-  width: 100%;
-  padding: 8px;
-  font-family: inherit;
-  font-size: 13px;
-  background: #1a1a1a;
-  color: #e6e6e6;
-  border: 1px solid #444;
-  border-radius: 4px;
-  resize: vertical;
+  width: 100%; padding: 8px; font-family: inherit; font-size: 13px;
+  background: #1a1a1a; color: #e6e6e6;
+  border: 1px solid #444; border-radius: 4px; resize: vertical;
 }
-
 .chat-input textarea:focus { outline: none; border-color: #4a8ac8; }
-
 .chat-input button {
-  align-self: flex-end;
-  padding: 6px 16px;
-  background: #2a5a8a;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
+  align-self: flex-end; padding: 6px 16px;
+  background: #2a5a8a; color: #fff; border: none;
+  border-radius: 4px; cursor: pointer; font-size: 13px;
 }
-
 .chat-input button:hover:not(:disabled) { background: #3a6a9a; }
 .chat-input button:disabled { opacity: 0.5; cursor: not-allowed; }
-
 .chat-error {
-  padding: 8px 12px;
-  background: #4a2020;
-  color: #ffb0b0;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 8px 12px; background: #4a2020; color: #ffb0b0;
+  border-radius: 4px; font-size: 12px;
 }
-
 .chat-empty {
-  color: #666;
-  font-size: 12px;
-  padding: 12px;
-  text-align: center;
-  border: 1px dashed #333;
-  border-radius: 4px;
+  color: #666; font-size: 12px; padding: 12px;
+  text-align: center; border: 1px dashed #333; border-radius: 4px;
 }
-
 .chat-results {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
 }
 
-/* --- Plan card --- */
-
+/* Plan */
 .plan-card {
-  padding: 12px;
-  background: #232323;
-  border: 1px solid #333;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  padding: 12px; background: #232323; border: 1px solid #333;
+  border-radius: 6px; display: flex; flex-direction: column; gap: 10px;
 }
-
 .plan-header { display: flex; gap: 6px; flex-wrap: wrap; }
-
 .badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #2a2a2a;
-  color: #b8b8b8;
+  font-size: 11px; padding: 2px 8px; border-radius: 4px;
+  background: #2a2a2a; color: #b8b8b8;
 }
-
 .badge-intent { background: #2a3a5a; color: #aac8ee; }
 .badge-gene { background: #2a4a2a; color: #b8e0b8; }
 .badge-organism { background: #4a3a2a; color: #e0c8b0; }
-
 .plan-rationale { font-size: 13px; line-height: 1.4; color: #d8d8d8; }
-
 .plan-metrics {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  font-size: 12px;
-  color: #888;
+  display: flex; gap: 12px; flex-wrap: wrap;
+  font-size: 12px; color: #888;
 }
-
 .plan-metrics .metric b { color: #e6e6e6; margin-left: 4px; }
-
 .plan-warnings {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 12px;
-  color: #ffb0b0;
+  list-style: none; padding: 0; margin: 0;
+  font-size: 12px; color: #ffb0b0;
 }
-
 .plan-warnings li { padding: 4px 0; }
-
 .plan-steps {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border-top: 1px solid #333;
-  padding-top: 10px;
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 4px;
+  border-top: 1px solid #333; padding-top: 10px;
 }
-
 .plan-step {
-  display: grid;
-  grid-template-columns: 24px 160px 1fr;
-  gap: 8px;
-  align-items: baseline;
-  font-size: 12px;
-  padding: 3px 0;
+  display: grid; grid-template-columns: 24px 160px 1fr;
+  gap: 8px; align-items: baseline; font-size: 12px; padding: 3px 0;
 }
-
 .step-order { color: #666; }
 .step-action { color: #88c8e8; font-family: ui-monospace, monospace; }
 .step-desc { color: #b8b8b8; }
-
 .plan-notes {
-  font-size: 11px;
-  color: #888;
-  border-top: 1px solid #333;
-  padding-top: 8px;
+  font-size: 11px; color: #888;
+  border-top: 1px solid #333; padding-top: 8px;
 }
 
-/* --- CRISPR panel --- */
-
-.crispr-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
-}
-
+/* CRISPR / Simulation panels */
+.crispr-panel { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .crispr-input { display: flex; flex-direction: column; gap: 6px; }
-
 .crispr-input label { font-size: 12px; color: #888; }
-
 .crispr-input textarea {
-  width: 100%;
-  padding: 8px;
-  font-family: ui-monospace, monospace;
-  font-size: 12px;
-  background: #1a1a1a;
-  color: #e6e6e6;
-  border: 1px solid #444;
-  border-radius: 4px;
-  resize: vertical;
+  width: 100%; padding: 8px;
+  font-family: ui-monospace, monospace; font-size: 12px;
+  background: #1a1a1a; color: #e6e6e6;
+  border: 1px solid #444; border-radius: 4px; resize: vertical;
 }
-
 .crispr-input textarea:focus { outline: none; border-color: #4a8ac8; }
-
 .crispr-input button {
-  align-self: flex-end;
-  padding: 6px 16px;
-  background: #2a5a8a;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
+  align-self: flex-end; padding: 6px 16px;
+  background: #2a5a8a; color: #fff; border: none;
+  border-radius: 4px; cursor: pointer; font-size: 13px;
 }
-
 .crispr-input button:hover:not(:disabled) { background: #3a6a9a; }
 .crispr-input button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .guide-selector { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
 .guide-selector label { font-size: 12px; color: #888; }
 .guide-selector select {
-  padding: 6px 8px;
-  background: #1a1a1a;
-  color: #e6e6e6;
-  border: 1px solid #444;
-  border-radius: 4px;
-  font-family: ui-monospace, monospace;
-  font-size: 12px;
+  padding: 6px 8px; background: #1a1a1a; color: #e6e6e6;
+  border: 1px solid #444; border-radius: 4px;
+  font-family: ui-monospace, monospace; font-size: 12px;
 }
 
 .guide-list h3,
 .offtarget-list h3 {
-  font-size: 12px;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 8px 0;
+  font-size: 12px; color: #888;
+  text-transform: uppercase; letter-spacing: 0.5px; margin: 8px 0;
 }
 
 .guide-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
+  width: 100%; border-collapse: collapse; font-size: 12px;
 }
-
 .guide-table th {
-  text-align: left;
-  padding: 4px 6px;
-  color: #888;
-  border-bottom: 1px solid #333;
-  font-weight: normal;
-  font-size: 11px;
-  text-transform: uppercase;
+  text-align: left; padding: 4px 6px; color: #888;
+  border-bottom: 1px solid #333; font-weight: normal;
+  font-size: 11px; text-transform: uppercase;
 }
-
 .guide-table td {
-  padding: 4px 6px;
-  border-bottom: 1px solid #2a2a2a;
-  color: #d8d8d8;
+  padding: 4px 6px; border-bottom: 1px solid #2a2a2a; color: #d8d8d8;
 }
-
 .guide-table .mono {
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  color: #a8d8a8;
+  font-family: ui-monospace, monospace; font-size: 11px; color: #a8d8a8;
 }
-
-.guide-table tr.row-perfect {
-  background: rgba(136, 216, 136, 0.08);
-}
+.guide-table tr.row-perfect { background: rgba(136, 216, 136, 0.08); }
 
 .score-good { color: #88d888; font-weight: bold; }
 .score-mid { color: #e8c888; }
 .score-bad { color: #e88888; }
 
 .guide-warnings {
-  list-style: none;
-  padding: 0;
-  margin: 8px 0 0;
-  font-size: 11px;
-  color: #ffb0b0;
+  list-style: none; padding: 0; margin: 8px 0 0;
+  font-size: 11px; color: #ffb0b0;
 }
 
 .offtarget-summary {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  font-size: 12px;
-  color: #888;
-  margin: 6px 0 10px;
+  display: flex; gap: 12px; flex-wrap: wrap;
+  font-size: 12px; color: #888; margin: 6px 0 10px;
 }
-
 .offtarget-summary b { color: #e6e6e6; margin-left: 4px; }
 
 .offtarget-empty {
-  font-size: 12px;
-  color: #666;
-  padding: 8px 0;
-  margin: 0;
+  font-size: 12px; color: #666; padding: 8px 0; margin: 0;
 }
+
+/* Simulation panel */
+
+.sim-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 100px 100px 100px;
+  gap: 8px;
+  align-items: end;
+  font-size: 12px;
+  color: #888;
+}
+
+.sim-grid label { display: flex; flex-direction: column; gap: 4px; }
+
+.sim-grid input,
+.sim-grid select {
+  padding: 6px 8px; font-family: inherit; font-size: 12px;
+  background: #1a1a1a; color: #e6e6e6;
+  border: 1px solid #444; border-radius: 4px;
+}
+
+.sim-grid input:focus,
+.sim-grid select:focus { outline: none; border-color: #4a8ac8; }
+
+.sim-grid input:disabled { opacity: 0.4; }
+
+.sim-result {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 12px; background: #232323;
+  border: 1px solid #333; border-radius: 6px;
+}
+
+.sim-result h4 {
+  font-size: 12px; color: #888;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin: 8px 0 0;
+}
+
+.seq-mono {
+  font-family: ui-monospace, monospace;
+  font-size: 11px; color: #a8d8a8;
+  word-break: break-all;
+  padding: 8px; background: #1a1a1a; border-radius: 4px;
+  margin: 6px 0 0;
+}
+
+details summary {
+  cursor: pointer; color: #888; font-size: 12px;
+  padding: 4px 0;
+}
+
+/* Consequence tree */
+
+.consequence-node {
+  border-left: 1px solid #333;
+  padding-left: 8px;
+  margin: 4px 0;
+}
+
+.consequence-row {
+  display: flex; gap: 8px; align-items: baseline;
+  font-size: 12px; padding: 2px 0;
+}
+
+.ctype {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  min-width: 80px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.ctype-edit { background: #3a2a5a; color: #c8b8ee; }
+.ctype-transcript { background: #2a3a5a; color: #aac8ee; }
+.ctype-protein { background: #2a4a2a; color: #b8e0b8; }
+.ctype-pathway { background: #4a3a2a; color: #e0c8b0; }
+.ctype-phenotype { background: #4a2a3a; color: #e0b0c8; }
+
+.cdesc { flex: 1; color: #d8d8d8; }
+.cconf { font-size: 11px; color: #888; }
