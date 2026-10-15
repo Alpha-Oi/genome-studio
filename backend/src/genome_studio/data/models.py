@@ -1,4 +1,41 @@
-"""SQLAlchemy ORM models."""
+"""SQLAlchemy ORM models.
+
+ТЕКУЩИЕ ТАБЛИЦЫ:
+- projects (name, description, organism, timestamps)
+- experiments (project_id, kind, title, payload_json, created_at)
+- warnings (project_id, level, severity, type, message, ...)
+
+ПЛАН БУДУЩИХ ТАБЛИЦ (НЕ реализовано, см. docs/15-multiuser-architecture.md):
+
+AppSettings (Фаза A0):
+- id, mode (local|multi), set_at, set_by
+
+User (Фаза A1):
+- id, email, password_hash, name, is_admin, created_at
+
+RefreshToken (Фаза A1):
+- id, user_id, token_hash, expires_at, created_at
+
+Organization (Фаза B):
+- id, name, created_at
+
+Membership (Фаза B):
+- id, user_id, org_id, role (owner|admin|member|viewer)
+
+ПЛАН БУДУЩИХ ПОЛЕЙ в существующих таблицах:
+
+Project (Фаза B):
+- owner_id (FK users.id) — кто создал
+- organization_id (FK organizations.id) — какая организация
+- visibility (private|org_read|org_edit) — уровень доступа
+
+Experiment (Фаза C1, опционально):
+- gene, organism, intent — денормализованные поля для быстрого
+  SQL-поиска «где-то уже делали knockout lacZ в E. coli»
+
+ВАЖНО: эти поля пока НЕ создаются. Существующие проекты
+мигрируют при первом переходе в multi mode — привязка к админу.
+"""
 
 from __future__ import annotations
 
@@ -15,7 +52,10 @@ def _utcnow() -> datetime:
 
 
 class Project(Base):
-    """A research project."""
+    """A research project.
+
+    TODO (Фаза B): owner_id, organization_id, visibility.
+    """
 
     __tablename__ = "projects"
 
@@ -51,7 +91,11 @@ class Project(Base):
 
 
 class Experiment(Base):
-    """A single experiment (goal plan, crispr design, simulation, etc.)."""
+    """A single experiment (goal plan, crispr design, simulation, etc.).
+
+    TODO (Фаза C1): денормализованные gene / organism / intent
+    для быстрого поиска похожих экспериментов.
+    """
 
     __tablename__ = "experiments"
 

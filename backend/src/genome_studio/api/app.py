@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from genome_studio import __version__
+from genome_studio.api.mode import router as mode_router
 from genome_studio.build_resolver import resolve_build
 from genome_studio.crispr.designer import design_guides
 from genome_studio.crispr.offtarget import find_offtargets, off_target_risk
@@ -215,6 +216,10 @@ def create_app() -> FastAPI:
     )
 
     kg = build_default_kg()
+
+    # --- Mode router ---------------------------------------------------
+
+    app.include_router(mode_router)
 
     @app.get("/health")
     async def health() -> dict[str, str]:
