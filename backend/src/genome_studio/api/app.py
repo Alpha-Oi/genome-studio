@@ -31,6 +31,7 @@ from genome_studio.intent.parser import ParseError, parse_goal
 from genome_studio.knowledge.seed import build_default_kg
 from genome_studio.reasoning.mapper import map_goal
 from genome_studio.reasoning.planner import build_plan
+from genome_studio.report import build_project_pdf
 from genome_studio.simulation import (
     Edit,
     EditError,
@@ -543,10 +544,7 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail=str(e)) from e
         return {"status": "deleted", "id": experiment_id}
 
-    @app.get(
-        "/projects/{project_id}/warnings",
-        response_model=WarningListResponse,
-    )
+    @app.get("/projects/{project_id}/warnings", response_model=WarningListResponse)
     async def warnings_list(
         project_id: int,
         status: str | None = None,
@@ -586,5 +584,36 @@ def create_app() -> FastAPI:
         except WarningError as e:
             raise HTTPException(status_code=422, detail=str(e)) from e
         return WarningResponse(warning=w.to_dict())
+
+    @app.get("/projects/{project_id}/report.pdf")
+    async def project_report_pdf(
+        project_id: int,
+        session: AsyncSession = Depends(get_session),
+    ) -> Response:
+        try:
+            project = await get_project(session, project_id)
+        except NotFoundError as e:
+            raise HTTPException(status_code=404, detail=str(e)) from e
+
+        experiments = await list_experiments(session, project_id)
+        warnings = await list_warnings(session, project_id)
+
+        pdf_bytes = build_project_pdf(
+            project=project.to_dict(),
+            experiments=[e.to_dict() for e in experiments],
+            warnings=[w.to_dict() for w in warnings],
+        )
+
+        safe_name = "".join(
+            c if c.isalnum() or c in "-_" else "_" for c in project.name
+        )[:60] or "project"
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_name}_report.pdf"'
+            },
+        )
 
     return app

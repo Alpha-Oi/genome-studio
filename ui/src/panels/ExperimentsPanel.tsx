@@ -3,6 +3,7 @@ import {
   deleteExperiment,
   listExperiments,
 } from "@/lib/projectsApi";
+import { downloadProjectReport } from "@/lib/reportApi";
 import type { Experiment } from "@/types/project";
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 export function ExperimentsPanel({ projectId, refreshKey = 0 }: Props) {
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   async function refresh() {
     if (projectId === null) {
@@ -43,6 +45,19 @@ export function ExperimentsPanel({ projectId, refreshKey = 0 }: Props) {
     }
   }
 
+  async function download() {
+    if (projectId === null) return;
+    setDownloading(true);
+    setError(null);
+    try {
+      await downloadProjectReport(projectId);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   if (projectId === null) {
     return (
       <div className="panel">
@@ -54,7 +69,17 @@ export function ExperimentsPanel({ projectId, refreshKey = 0 }: Props) {
 
   return (
     <div className="panel">
-      <h2>Experiments ({experiments.length})</h2>
+      <div className="exp-panel-head">
+        <h2>Experiments ({experiments.length})</h2>
+        <button
+          className="pdf-btn"
+          onClick={() => void download()}
+          disabled={downloading}
+          title="Download PDF report"
+        >
+          {downloading ? "…" : "PDF"}
+        </button>
+      </div>
 
       {error && <div className="chat-error">Error: {error}</div>}
 
