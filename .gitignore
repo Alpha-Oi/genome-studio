@@ -55,3 +55,6 @@ data/samples/
 # Dev-логи
 ~/.gs/dev/logs/
 logs/dev/
+
+# Docker
+.docker/

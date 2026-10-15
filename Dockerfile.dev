@@ -1,0 +1,43 @@
+# syntax=docker/dockerfile:1.7
+# DEV-сборка. Только для локального тестирования.
+# НЕ распространять. НЕ использовать в production.
+
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    GS_BUILD=dev \
+    GS_DEV_OVERRIDE_AVAILABLE=1 \
+    UV_LINK_MODE=copy
+
+# Rust для maturin
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl build-essential pkg-config libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.82
+ENV PATH="/root/.cargo/bin:$PATH"
+
+RUN pip install --no-cache-dir uv==0.5.11 maturin==1.7.4
+
+WORKDIR /app
+
+COPY pyproject.toml ./
+COPY backend/pyproject.toml backend/
+COPY backend/README.md backend/
+COPY backend/src ./backend/src
+COPY backend/tests ./backend/tests
+
+COPY core-rs ./core-rs
+RUN cd core-rs && maturin develop --features "python,dev_override" --release
+
+RUN uv sync --all-extras --package genome-studio-backend
+
+ENV PYTHONPATH="/app/backend/src"
+
+# Изоляция: не даём наружу сеть при запуске.
+# Это внутри контейнера, реальная изоляция — на уровне docker-compose / firewall.
+
+EXPOSE 8000
+
+CMD ["uvicorn", "genome_studio.api.app:create_app", "--factory", "--host", "127.0.0.1", "--port", "8000", "--reload"]

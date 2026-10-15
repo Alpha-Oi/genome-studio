@@ -1,0 +1,51 @@
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+.venv
+venv
+.pytest_cache
+.mypy_cache
+.ruff_cache
+uv.lock
+
+# Rust
+core-rs/target
+
+# Node
+ui/node_modules
+ui/dist
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+secrets/
+~/.gs/keys/
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+*.bam
+*.bai
+*.cram
+*.vcf.gz
+*.tbi
+data/references/
+data/samples/
+
+# Docs (не нужны в образе)
+docs/
+adr/
+build/dist/
+logs/
