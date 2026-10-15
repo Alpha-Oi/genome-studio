@@ -1,0 +1,48 @@
+[package]
+name = "gs-core"
+version = "0.0.1"
+edition = "2021"
+rust-version = "1.80"
+description = "Genome Studio core — Rust hot paths"
+license = "Proprietary"
+authors = ["Genome Studio"]
+
+[lib]
+name = "gs_core"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+
+# КРИТИЧНО: dev_override позволяет обходить T2.
+# По умолчанию ВЫКЛЮЧЕН. В prod-сборке НИКОГДА не включается.
+# Включается только явно: `cargo build --features dev_override`.
+dev_override = []
+
+# PyO3 binding — включается для Python-модуля через maturin.
+python = ["dep:pyo3"]
+
+[dependencies]
+thiserror = "2.0"
+
+# PyO3 — опционально, для Python-binding.
+pyo3 = { version = "0.23", features = ["extension-module"], optional = true }
+
+# Биоинформатика (пока закомментировано — добавим в следующих шагах)
+# needletail = "0.6"
+# noodles = { version = "0.80", features = ["bam", "vcf"] }
+# rust-bio = "1.0"
+# rayon = "1.10"
+
+# Крипто для dev-ключа
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+rand = "0.8"
+
+[dev-dependencies]
+tempfile = "3.13"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+opt-level = 3
+strip = true
