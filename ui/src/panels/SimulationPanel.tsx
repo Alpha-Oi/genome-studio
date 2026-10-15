@@ -42,7 +42,7 @@ export function SimulationPanel() {
 
   return (
     <div className="crispr-panel">
-      <h3 style={{ marginTop: 16 }}>Simulate edit</h3>
+      <h3>Simulate edit</h3>
 
       <div className="crispr-input">
         <label>DNA sequence:</label>
@@ -76,19 +76,29 @@ export function SimulationPanel() {
         </label>
         <label>
           Ref
-          <input value={ref} onChange={(e) => setRef(e.target.value)} disabled={kind === "insertion"} />
+          <input
+            value={ref}
+            onChange={(e) => setRef(e.target.value)}
+            disabled={kind === "insertion"}
+          />
         </label>
         <label>
           Alt
-          <input value={alt} onChange={(e) => setAlt(e.target.value)} disabled={kind === "deletion"} />
+          <input
+            value={alt}
+            onChange={(e) => setAlt(e.target.value)}
+            disabled={kind === "deletion"}
+          />
         </label>
       </div>
 
-      <button onClick={() => void submit()} disabled={loading}>
-        {loading ? "…" : "Simulate"}
-      </button>
+      <div className="crispr-input">
+        <button onClick={() => void submit()} disabled={loading}>
+          {loading ? "…" : "Simulate"}
+        </button>
+      </div>
 
-      {error && <div className="chat-error">Ошибка: {error}</div>}
+      {error && <div className="chat-error">Error: {error}</div>}
 
       {result && (
         <div className="sim-result">
