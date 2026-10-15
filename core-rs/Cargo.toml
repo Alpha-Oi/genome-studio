@@ -26,7 +26,7 @@ python = ["dep:pyo3"]
 thiserror = "2.0"
 
 # PyO3 — опционально, для Python-binding.
-pyo3 = { version = "0.23", features = ["extension-module"], optional = true }
+pyo3 = { version = "0.29", features = ["extension-module"], optional = true }
 
 # Биоинформатика (пока закомментировано — добавим в следующих шагах)
 # needletail = "0.6"
