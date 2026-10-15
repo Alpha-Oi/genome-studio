@@ -1,6 +1,7 @@
 import {
   BrowserPanel,
   ChatPanel,
+  CrisprPanel,
   DevPanel,
   ProjectsPanel,
   WarningsPanel,
@@ -25,6 +26,7 @@ export function App() {
 
         <section className="app-center">
           <BrowserPanel />
+          <CrisprPanel />
         </section>
 
         <aside className="app-right">

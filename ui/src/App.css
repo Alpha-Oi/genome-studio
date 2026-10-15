@@ -99,10 +99,7 @@ body, html, #root {
   resize: vertical;
 }
 
-.chat-input textarea:focus {
-  outline: none;
-  border-color: #4a8ac8;
-}
+.chat-input textarea:focus { outline: none; border-color: #4a8ac8; }
 
 .chat-input button {
   align-self: flex-end;
@@ -169,11 +166,7 @@ body, html, #root {
 .badge-gene { background: #2a4a2a; color: #b8e0b8; }
 .badge-organism { background: #4a3a2a; color: #e0c8b0; }
 
-.plan-rationale {
-  font-size: 13px;
-  line-height: 1.4;
-  color: #d8d8d8;
-}
+.plan-rationale { font-size: 13px; line-height: 1.4; color: #d8d8d8; }
 
 .plan-metrics {
   display: flex;
@@ -224,4 +217,93 @@ body, html, #root {
   color: #888;
   border-top: 1px solid #333;
   padding-top: 8px;
+}
+
+/* --- CRISPR panel --- */
+
+.crispr-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.crispr-input { display: flex; flex-direction: column; gap: 6px; }
+
+.crispr-input label { font-size: 12px; color: #888; }
+
+.crispr-input textarea {
+  width: 100%;
+  padding: 8px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  background: #1a1a1a;
+  color: #e6e6e6;
+  border: 1px solid #444;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.crispr-input textarea:focus { outline: none; border-color: #4a8ac8; }
+
+.crispr-input button {
+  align-self: flex-end;
+  padding: 6px 16px;
+  background: #2a5a8a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.crispr-input button:hover:not(:disabled) { background: #3a6a9a; }
+.crispr-input button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.guide-list h3 {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 8px 0;
+}
+
+.guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.guide-table th {
+  text-align: left;
+  padding: 4px 6px;
+  color: #888;
+  border-bottom: 1px solid #333;
+  font-weight: normal;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.guide-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #2a2a2a;
+  color: #d8d8d8;
+}
+
+.guide-table .mono {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: #a8d8a8;
+}
+
+.score-good { color: #88d888; font-weight: bold; }
+.score-mid { color: #e8c888; }
+.score-bad { color: #e88888; }
+
+.guide-warnings {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: #ffb0b0;
 }
