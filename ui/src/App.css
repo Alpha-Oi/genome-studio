@@ -202,6 +202,17 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 .crispr-input button:hover:not(:disabled) { background: #3a6a9a; }
 .crispr-input button:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.crispr-actions {
+  display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;
+}
+.crispr-actions button {
+  align-self: auto;
+}
+.crispr-actions .batch-btn {
+  background: #3a2a5a;
+}
+.crispr-actions .batch-btn:hover:not(:disabled) { background: #4a3a6a; }
+
 .fasta-upload { display: inline-flex; align-items: center; gap: 8px; }
 .fasta-btn {
   padding: 3px 10px; font-size: 11px;
@@ -211,9 +222,7 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 }
 .fasta-btn:hover:not(:disabled) { background: #3a4a3a; }
 .fasta-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.fasta-error {
-  font-size: 11px; color: #ffb0b0;
-}
+.fasta-error { font-size: 11px; color: #ffb0b0; }
 .fasta-info {
   font-size: 11px; color: #88d888;
   padding: 3px 8px; background: rgba(136, 216, 136, 0.08);
@@ -229,7 +238,8 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 }
 
 .guide-list h3,
-.offtarget-list h3 {
+.offtarget-list h3,
+.batch-results h3 {
   font-size: 12px; color: #888;
   text-transform: uppercase; letter-spacing: 0.5px; margin: 8px 0;
 }
@@ -247,6 +257,7 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   font-family: ui-monospace, monospace; font-size: 11px; color: #a8d8a8;
 }
 .guide-table tr.row-perfect { background: rgba(136, 216, 136, 0.08); }
+.guide-table tr.row-error td { color: #e88888; }
 
 .score-good { color: #88d888; font-weight: bold; }
 .score-mid { color: #e8c888; }

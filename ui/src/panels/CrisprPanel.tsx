@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { designGuides, findOffTargets } from "@/lib/crisprApi";
 import { createExperiment } from "@/lib/projectsApi";
+import { batchDesign, type BatchResult, type BatchSequence } from "@/lib/batchApi";
 import { GuideList } from "@/components/GuideList";
 import { OffTargetList } from "@/components/OffTargetList";
 import { FastaUploadButton } from "@/components/FastaUploadButton";
+import { BatchResultsTable } from "@/components/BatchResultsTable";
 import type { Guide } from "@/types/guide";
 import type { OffTargetResult } from "@/types/offtarget";
 
@@ -26,6 +28,8 @@ export function CrisprPanel({ projectId, onExperimentSaved }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fastaInfo, setFastaInfo] = useState<string | null>(null);
+  const [batchResults, setBatchResults] = useState<BatchResult[]>([]);
+  const [batchBusy, setBatchBusy] = useState(false);
 
   const [selectedGuide, setSelectedGuide] = useState<string | null>(null);
   const [reference, setReference] = useState(OFF_TARGET_REF);
@@ -79,6 +83,51 @@ export function CrisprPanel({ projectId, onExperimentSaved }: Props) {
     setTimeout(() => setFastaInfo(null), 5000);
   }
 
+  async function runBatch() {
+    // Split textarea content by blank lines if multiple sequences pasted
+    // Fallback: treat as one sequence.
+    const raw = sequence.trim();
+    if (!raw || batchBusy) return;
+
+    // Build sequences: split by ">name" headers if present, otherwise single
+    const sequences: BatchSequence[] = [];
+    if (raw.includes(">")) {
+      const parts = raw.split(/^>+/m).filter((p) => p.trim());
+      parts.forEach((p, i) => {
+        const lines = p.split("\\n");
+        const header = (lines[0] ?? "").trim().split(/\\s+/)[0] || "seq" + (i + 1);
+        const seq = lines.slice(1).join("").replace(/\\s/g, "");
+        if (seq) sequences.push({ name: header, sequence: seq });
+      });
+    } else {
+      sequences.push({ name: "seq1", sequence: raw.replace(/\\s/g, "") });
+    }
+
+    if (sequences.length === 0) return;
+
+    setBatchBusy(true);
+    setError(null);
+    try {
+      const results = await batchDesign(sequences, 3, 0.0);
+      setBatchResults(results);
+
+      if (projectId !== null && results.length > 0) {
+        try {
+          const title = "Batch design: " + results.length + " sequences";
+          await createExperiment(projectId, "crispr_batch", title, { results });
+          if (onExperimentSaved) onExperimentSaved();
+        } catch (persistErr) {
+          console.warn("Failed to save batch experiment:", persistErr);
+        }
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+      setBatchResults([]);
+    } finally {
+      setBatchBusy(false);
+    }
+  }
+
   async function checkOffTarget() {
     if (!selectedGuide || otLoading) return;
     const ref = reference.trim();
@@ -129,14 +178,26 @@ export function CrisprPanel({ projectId, onExperimentSaved }: Props) {
           value={sequence}
           onChange={(e) => setSequence(e.target.value)}
           rows={4}
-          disabled={loading}
+          disabled={loading || batchBusy}
         />
-        <button onClick={() => void submit()} disabled={loading || !sequence.trim()}>
-          {loading ? "…" : "Design guides"}
-        </button>
+        <div className="crispr-actions">
+          <button onClick={() => void submit()} disabled={loading || batchBusy || !sequence.trim()}>
+            {loading ? "…" : "Design guides"}
+          </button>
+          <button
+            className="batch-btn"
+            onClick={() => void runBatch()}
+            disabled={batchBusy || !sequence.trim()}
+            title="Design top guides for each sequence (split by '>' headers)"
+          >
+            {batchBusy ? "…" : "Batch design"}
+          </button>
+        </div>
       </div>
 
       {error && <div className="chat-error">Error: {error}</div>}
+
+      {batchResults.length > 0 && <BatchResultsTable results={batchResults} />}
 
       {guides.length > 0 && (
         <div className="guide-selector">
