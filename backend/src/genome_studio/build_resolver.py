@@ -1,13 +1,7 @@
-"""Build Resolver — определяет, в каком режиме работает приложение.
+"""Build Resolver - определяет режим работы приложения.
 
 Критический модуль. Отвечает за разделение prod / internal / dev.
 В prod-сборке Dev Override НЕДОСТУПЕН by design.
-
-Правила:
-- BUILD_MODE берётся из переменной окружения GS_BUILD.
-- По умолчанию — "prod" (безопасный дефолт).
-- Dev-режим требует: подписанный ключ + локальная среда + нет внешней сети.
-- Если хоть одно условие не выполнено — переход в prod.
 """
 
 from __future__ import annotations
@@ -17,7 +11,6 @@ import socket
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Final
 
 
 class BuildMode(str, Enum):
@@ -32,12 +25,6 @@ class DevModeError(RuntimeError):
     """Dev-режим не может быть активирован."""
 
 
-# Жёстко прошитый режим prod.
-# В prod-сборке этот флаг остаётся False всегда.
-# В dev-сборке при сборке заменяется на True через compile-time конфиг.
-_DEV_OVERRIDE_AVAILABLE: Final[bool] = os.environ.get("GS_DEV_OVERRIDE_AVAILABLE") == "1"
-
-
 @dataclass(frozen=True)
 class BuildInfo:
     """Информация о текущей сборке."""
@@ -49,6 +36,15 @@ class BuildInfo:
     reasons: tuple[str, ...]
 
 
+def _dev_override_available() -> bool:
+    """Проверяет, разрешён ли dev-override в этой сборке.
+
+    Читается динамически, чтобы тесты могли менять env.
+    В prod-контейнере GS_DEV_OVERRIDE_AVAILABLE жёстко "0".
+    """
+    return os.environ.get("GS_DEV_OVERRIDE_AVAILABLE") == "1"
+
+
 def _env_build_mode() -> BuildMode:
     """Читает GS_BUILD. Неизвестное значение -> prod."""
     raw = os.environ.get("GS_BUILD", "prod").strip().lower()
@@ -58,24 +54,36 @@ def _env_build_mode() -> BuildMode:
         return BuildMode.PROD
 
 
+def _gs_home() -> Path:
+    """Домашняя директория Genome Studio.
+
+    Приоритет:
+    1. GS_HOME env var - для тестов и изоляции.
+    2. Path.home() - системный (USERPROFILE на Windows, HOME на Unix).
+    """
+    gs_home = os.environ.get("GS_HOME")
+    if gs_home:
+        return Path(gs_home)
+    return Path.home()
+
+
 def _signing_key_path() -> Path:
     """Путь к подписанному dev-ключу."""
-    return Path.home() / ".gs" / "keys" / "dev-signing.key"
+    return _gs_home() / ".gs" / "keys" / "dev-signing.key"
 
 
 def _has_signing_key() -> bool:
+    """Проверяет наличие dev-ключа."""
     return _signing_key_path().is_file()
 
 
 def _is_isolated() -> bool:
     """Грубая проверка изоляции.
 
-    Возвращает True, если найдено внешнее сетевое подключение.
-    Настоящая проверка — в Rust-модуле (Build Resolver).
-    Здесь — упрощённая эвристика для MVP.
+    Возвращает True, если внешняя сеть недоступна.
+    Настоящая проверка - в Rust-модуле (Build Resolver).
     """
     try:
-        # Попытка подключиться к внешнему DNS. Если получается — не изолирован.
         with socket.create_connection(("1.1.1.1", 53), timeout=0.5):
             return False
     except (OSError, socket.timeout):
@@ -83,19 +91,12 @@ def _is_isolated() -> bool:
 
 
 def resolve_build() -> BuildInfo:
-    """Определяет режим сборки со всеми проверками.
-
-    Логика:
-    1. Если GS_DEV_OVERRIDE_AVAILABLE != "1" — это prod-сборка, дальше не идём.
-    2. Если нет подписанного ключа — откат в prod.
-    3. Если среда не изолирована — откат в prod.
-    4. Иначе — включён dev-режим.
-    """
+    """Определяет режим сборки со всеми проверками."""
     reasons: list[str] = []
     env_mode = _env_build_mode()
 
-    # 1. Prod-сборка — dev-код физически отсутствует.
-    if not _DEV_OVERRIDE_AVAILABLE:
+    # 1. Prod-сборка - dev-код физически отсутствует.
+    if not _dev_override_available():
         reasons.append("dev_override not compiled in this build")
         return BuildInfo(
             mode=BuildMode.PROD,
@@ -105,7 +106,6 @@ def resolve_build() -> BuildInfo:
             reasons=tuple(reasons),
         )
 
-    # Дальше — только для сборок с dev_override.
     if env_mode != BuildMode.DEV:
         reasons.append(f"GS_BUILD={env_mode.value}, dev not requested")
         return BuildInfo(
@@ -160,10 +160,7 @@ def is_prod() -> bool:
 
 
 def require_dev() -> None:
-    """Бросает исключение, если текущий режим — не dev.
-
-    Используется перед активацией dev-панели или отключением T2.
-    """
+    """Бросает исключение, если текущий режим - не dev."""
     info = resolve_build()
     if info.mode != BuildMode.DEV:
         raise DevModeError(

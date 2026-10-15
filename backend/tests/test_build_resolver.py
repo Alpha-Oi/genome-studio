@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from unittest.mock import patch
 
 from genome_studio.build_resolver import BuildMode, resolve_build
@@ -22,7 +21,7 @@ def test_dev_requires_signing_key(monkeypatch, tmp_path):
     """Dev не активируется без ключа."""
     monkeypatch.setenv("GS_DEV_OVERRIDE_AVAILABLE", "1")
     monkeypatch.setenv("GS_BUILD", "dev")
-    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("GS_HOME", str(tmp_path))
 
     info = resolve_build()
     assert info.mode == BuildMode.PROD
@@ -33,7 +32,7 @@ def test_dev_requires_isolation(monkeypatch, tmp_path):
     """Dev не активируется с внешней сетью."""
     monkeypatch.setenv("GS_DEV_OVERRIDE_AVAILABLE", "1")
     monkeypatch.setenv("GS_BUILD", "dev")
-    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("GS_HOME", str(tmp_path))
 
     key = tmp_path / ".gs" / "keys" / "dev-signing.key"
     key.parent.mkdir(parents=True)
@@ -49,7 +48,7 @@ def test_dev_activated_when_all_conditions_met(monkeypatch, tmp_path):
     """Dev активируется при всех условиях."""
     monkeypatch.setenv("GS_DEV_OVERRIDE_AVAILABLE", "1")
     monkeypatch.setenv("GS_BUILD", "dev")
-    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("GS_HOME", str(tmp_path))
 
     key = tmp_path / ".gs" / "keys" / "dev-signing.key"
     key.parent.mkdir(parents=True)
