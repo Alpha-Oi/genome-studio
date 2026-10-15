@@ -1,0 +1,18 @@
+[build]
+name = "genome-studio"
+mode = "prod"
+features = []
+allow_network = true
+allow_export = true
+require_signing_key = false
+log_dir = "~/.gs/prod/logs"
+
+[safety]
+t0_override = false
+t1_override = false
+t2_override = false
+dev_panel = false
+
+[checks]
+assert_no_dev_features = true
+assert_t2_enabled = true

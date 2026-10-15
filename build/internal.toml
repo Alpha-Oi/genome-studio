@@ -1,0 +1,18 @@
+[build]
+name = "genome-studio-internal"
+mode = "internal"
+features = ["dev_override"]
+allow_network = true
+allow_export = false
+require_signing_key = true
+log_dir = "~/.gs/internal/logs"
+
+[safety]
+t0_override = true
+t1_override = true
+t2_override = false
+dev_panel = true
+
+[checks]
+assert_no_dev_features = false
+assert_t2_enabled = true

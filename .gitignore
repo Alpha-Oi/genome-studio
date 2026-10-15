@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+uv.lock
+
+# Rust
+target/
+Cargo.lock
+*.so
+*.pyd
+
+# Node
+node_modules/
+dist/
+.pnpm-store/
+
+# Build
+build/dist/
+build/tmp/
+*.log
+
+# Secrets — НИКОГДА не коммитить
+.env
+.env.*
+*.key
+*.pem
+secrets/
+~/.gs/keys/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (большие файлы)
+*.bam
+*.bai
+*.cram
+*.crai
+*.vcf.gz
+*.tbi
+data/references/
+data/samples/
+
+# Dev-логи
+~/.gs/dev/logs/
+logs/dev/

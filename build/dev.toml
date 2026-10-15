@@ -1,0 +1,26 @@
+[build]
+name = "genome-studio-dev"
+mode = "dev"
+features = ["t0_override", "t1_override", "t2_override", "dev_panel"]
+allow_network = false
+allow_export = false
+require_signing_key = true
+log_dir = "~/.gs/dev/logs"
+
+[safety]
+t0_override = true
+t1_override = true
+t2_override = true
+dev_panel = true
+
+[isolation]
+network = "loopback_only"
+export = "disabled"
+lab_integrations = "disabled"
+telemetry = "disabled"
+database = "local_sandbox"
+pathogens = "synthetic_only"
+
+[checks]
+assert_local_environment = true
+assert_no_external_network = true
