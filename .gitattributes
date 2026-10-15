@@ -1,0 +1,51 @@
+# Автонормализация
+* text=auto eol=lf
+
+# Явно текстовые
+*.md       text eol=lf
+*.toml     text eol=lf
+*.py       text eol=lf
+*.rs       text eol=lf
+*.ts       text eol=lf
+*.tsx      text eol=lf
+*.js       text eol=lf
+*.json     text eol=lf
+*.yaml     text eol=lf
+*.yml      text eol=lf
+*.html     text eol=lf
+*.css      text eol=lf
+*.sql      text eol=lf
+*.sh       text eol=lf
+*.ps1      text eol=crlf
+*.bat      text eol=crlf
+*.cmd      text eol=crlf
+
+# Бинарные — не трогать
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.ico      binary
+*.pdf      binary
+*.zip      binary
+*.gz       binary
+*.bam      binary
+*.bai      binary
+*.cram     binary
+*.crai     binary
+*.vcf.gz   binary
+*.tbi      binary
+*.so       binary
+*.pyd      binary
+*.dll      binary
+*.exe      binary
+*.wasm     binary
+*.onnx     binary
+*.pt       binary
+*.pth      binary
+
+# Lock-файлы — не объединять
+uv.lock       -diff merge=ours
+Cargo.lock    -diff merge=ours
+pnpm-lock.yaml -diff merge=ours
+package-lock.json -diff merge=ours
