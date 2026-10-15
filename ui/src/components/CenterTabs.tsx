@@ -1,4 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { type ComponentType, type ReactNode } from "react";
+import {
+  BrowserIcon,
+  CrisprIcon,
+  SequencingIcon,
+  SimulationIcon,
+} from "@/components/icons/TabsIcons";
 
 export type CenterTab = "browser" | "crispr" | "simulation" | "sequencing";
 
@@ -7,37 +13,57 @@ interface Props {
   crispr: ReactNode;
   simulation: ReactNode;
   sequencing: ReactNode;
+  active: CenterTab;
+  onChange: (tab: CenterTab) => void;
 }
 
-const TABS: { id: CenterTab; label: string }[] = [
-  { id: "browser", label: "Browser" },
-  { id: "crispr", label: "CRISPR" },
-  { id: "simulation", label: "Simulation" },
-  { id: "sequencing", label: "Sequencing" },
+interface TabDef {
+  id: CenterTab;
+  label: string;
+  Icon: ComponentType<{ size?: number }>;
+}
+
+const TABS: TabDef[] = [
+  { id: "browser", label: "Browser", Icon: BrowserIcon },
+  { id: "crispr", label: "CRISPR", Icon: CrisprIcon },
+  { id: "simulation", label: "Simulation", Icon: SimulationIcon },
+  { id: "sequencing", label: "Sequencing", Icon: SequencingIcon },
 ];
 
 export function CenterTabs(props: Props) {
-  const [active, setActive] = useState<CenterTab>("browser");
+  const { active, onChange } = props;
 
   return (
     <div className="center-tabs">
       <nav className="tabs-bar">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={active === t.id ? "tab active" : "tab"}
-            onClick={() => setActive(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+        {TABS.map((t) => {
+          const Icon = t.Icon;
+          return (
+            <button
+              key={t.id}
+              className={active === t.id ? "tab active" : "tab"}
+              onClick={() => onChange(t.id)}
+            >
+              <Icon />
+              <span className="tab-label">{t.label}</span>
+            </button>
+          );
+        })}
       </nav>
 
       <div className="tabs-body">
-        {active === "browser" && props.browser}
-        {active === "crispr" && props.crispr}
-        {active === "simulation" && props.simulation}
-        {active === "sequencing" && props.sequencing}
+        <div style={{ display: active === "browser" ? "block" : "none" }}>
+          {props.browser}
+        </div>
+        <div style={{ display: active === "crispr" ? "block" : "none" }}>
+          {props.crispr}
+        </div>
+        <div style={{ display: active === "simulation" ? "block" : "none" }}>
+          {props.simulation}
+        </div>
+        <div style={{ display: active === "sequencing" ? "block" : "none" }}>
+          {props.sequencing}
+        </div>
       </div>
     </div>
   );

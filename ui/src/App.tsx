@@ -10,7 +10,7 @@ import {
   SimulationPanel,
   WarningsPanel,
 } from "@/panels";
-import { CenterTabs } from "@/components/CenterTabs";
+import { CenterTabs, type CenterTab } from "@/components/CenterTabs";
 import { getBuildInfo } from "@/lib/build-info";
 import { fetchMode } from "@/lib/modeApi";
 import "./App.css";
@@ -21,6 +21,7 @@ export function App() {
   const [sideRefreshKey, setSideRefreshKey] = useState(0);
   const [appMode, setAppMode] = useState<"local" | "multi" | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<CenterTab>("browser");
 
   function bump(message?: string) {
     setSideRefreshKey((k) => k + 1);
@@ -60,11 +61,14 @@ export function App() {
           <ExperimentsPanel
             projectId={selectedProjectId}
             refreshKey={sideRefreshKey}
+            onExperimentSaved={() => bump()}
           />
         </aside>
 
         <section className="app-center">
           <CenterTabs
+            active={activeTab}
+            onChange={setActiveTab}
             browser={<BrowserPanel />}
             crispr={
               <CrisprPanel

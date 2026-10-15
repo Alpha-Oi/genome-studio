@@ -87,6 +87,7 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   padding: 0 8px;
 }
 .tabs-bar .tab {
+  display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 16px; font-size: 12px;
   background: transparent; color: #888;
   border: none; border-bottom: 2px solid transparent;
@@ -97,6 +98,7 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 .tabs-bar .tab.active {
   color: #aac8ee; border-bottom-color: #4a8ac8;
 }
+.tabs-bar .tab-label { display: inline; }
 .tabs-body { flex: 1; overflow: auto; }
 
 /* Chat */
@@ -384,6 +386,12 @@ details summary {
 }
 .exp-kind { background: #2a3a5a; color: #aac8ee; }
 .exp-time { flex: 1; color: #666; font-size: 10px; }
+.exp-action {
+  background: transparent; border: none; color: #888;
+  font-size: 13px; cursor: pointer; padding: 0 4px;
+}
+.exp-action:hover:not(:disabled) { color: #aac8ee; }
+.exp-action:disabled { opacity: 0.5; cursor: not-allowed; }
 .exp-delete {
   background: transparent; border: none; color: #888;
   font-size: 14px; cursor: pointer; padding: 0 4px;

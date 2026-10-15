@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  createExperiment,
   deleteExperiment,
   listExperiments,
 } from "@/lib/projectsApi";
@@ -9,12 +10,27 @@ import type { Experiment } from "@/types/project";
 interface Props {
   projectId: number | null;
   refreshKey?: number;
+  onExperimentSaved?: () => void;
 }
 
-export function ExperimentsPanel({ projectId, refreshKey = 0 }: Props) {
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const isToday =
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate();
+  const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  if (isToday) return time;
+  const date = d.toLocaleDateString([], { month: "short", day: "numeric" });
+  return date + " " + time;
+}
+
+export function ExperimentsPanel({ projectId, refreshKey = 0, onExperimentSaved }: Props) {
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [duplicating, setDuplicating] = useState<number | null>(null);
 
   async function refresh() {
     if (projectId === null) {
@@ -42,6 +58,22 @@ export function ExperimentsPanel({ projectId, refreshKey = 0 }: Props) {
       setExperiments((prev) => prev.filter((e) => e.id !== id));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
+    }
+  }
+
+  async function duplicate(exp: Experiment) {
+    if (projectId === null || duplicating !== null) return;
+    setDuplicating(exp.id);
+    setError(null);
+    try {
+      const title = exp.title + " (copy)";
+      const created = await createExperiment(projectId, exp.kind, title, exp.payload);
+      setExperiments((prev) => [created, ...prev]);
+      if (onExperimentSaved) onExperimentSaved();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setDuplicating(null);
     }
   }
 
@@ -91,9 +123,15 @@ export function ExperimentsPanel({ projectId, refreshKey = 0 }: Props) {
             <li key={e.id} className="experiment-item">
               <div className="experiment-head">
                 <span className="badge exp-kind">{e.kind}</span>
-                <span className="exp-time">
-                  {new Date(e.created_at).toLocaleTimeString()}
-                </span>
+                <span className="exp-time">{formatDate(e.created_at)}</span>
+                <button
+                  className="exp-action"
+                  onClick={() => void duplicate(e)}
+                  disabled={duplicating === e.id}
+                  title="Duplicate"
+                >
+                  {duplicating === e.id ? "…" : "⎘"}
+                </button>
                 <button
                   className="exp-delete"
                   onClick={() => void remove(e.id)}
