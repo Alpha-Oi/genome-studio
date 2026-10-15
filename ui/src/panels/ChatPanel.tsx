@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { fetchPlan } from "@/lib/api";
 import { createExperiment } from "@/lib/projectsApi";
+import { fetchRelated, type RelatedItem } from "@/lib/relatedApi";
 import { PlanCard } from "@/components/PlanCard";
 import { GoalTemplates } from "@/components/GoalTemplates";
+import { RelatedHistory } from "@/components/RelatedHistory";
 import type { Plan } from "@/types/plan";
 
 interface Props {
   projectId: number | null;
   onPlanCreated?: () => void;
   onExperimentSaved?: () => void;
+  onOpenProject?: (projectId: number) => void;
 }
 
 interface PlanEntry {
@@ -16,11 +19,22 @@ interface PlanEntry {
   plan: Plan;
 }
 
-export function ChatPanel({ projectId, onPlanCreated, onExperimentSaved }: Props) {
+export function ChatPanel({
+  projectId,
+  onPlanCreated,
+  onExperimentSaved,
+  onOpenProject,
+}: Props) {
   const [text, setText] = useState("");
   const [plans, setPlans] = useState<PlanEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [related, setRelated] = useState<RelatedItem[]>([]);
+  const [relatedCriteria, setRelatedCriteria] = useState<{
+    gene: string;
+    organism: string;
+    intent: string;
+  } | null>(null);
 
   async function submit() {
     const trimmed = text.trim();
@@ -46,6 +60,20 @@ export function ChatPanel({ projectId, onPlanCreated, onExperimentSaved }: Props
         } catch (persistErr) {
           console.warn("Failed to save experiment:", persistErr);
         }
+      }
+
+      // find related history
+      try {
+        const gene = plan.goal.target.gene;
+        const organism = plan.goal.target.organism;
+        const intent = plan.goal.intent;
+        const items = await fetchRelated(gene, organism, intent, 5);
+        setRelated(items);
+        setRelatedCriteria({ gene, organism, intent });
+      } catch (relErr) {
+        console.warn("Failed to fetch related history:", relErr);
+        setRelated([]);
+        setRelatedCriteria(null);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
@@ -99,6 +127,14 @@ export function ChatPanel({ projectId, onPlanCreated, onExperimentSaved }: Props
           <PlanCard key={entry.id} plan={entry.plan} />
         ))}
       </div>
+
+      {onOpenProject && (
+        <RelatedHistory
+          items={related}
+          criteria={relatedCriteria}
+          onOpenProject={onOpenProject}
+        />
+      )}
     </div>
   );
 }

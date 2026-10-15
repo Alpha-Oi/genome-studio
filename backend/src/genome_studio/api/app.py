@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from genome_studio import __version__
 from genome_studio.api.batch import router as batch_router
 from genome_studio.api.mode import router as mode_router
+from genome_studio.api.related import router as related_router
 from genome_studio.api.parse import router as parse_router
 from genome_studio.build_resolver import resolve_build
 from genome_studio.crispr.designer import design_guides
@@ -222,6 +223,7 @@ def create_app() -> FastAPI:
     # --- Mode router ---------------------------------------------------
 
     app.include_router(mode_router)
+    app.include_router(related_router)
     app.include_router(batch_router)
     app.include_router(parse_router)
 

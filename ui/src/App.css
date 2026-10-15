@@ -140,6 +140,46 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
 }
 
+/* Related history */
+.related-history {
+  margin-top: 8px; padding: 10px;
+  background: #1e2a3a; border-radius: 6px;
+  border: 1px solid #2a4a6a;
+}
+.related-history h3 {
+  font-size: 11px; color: #88a8c8;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin: 0 0 8px;
+}
+.related-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.related-item {
+  padding: 8px; background: #232a3a; border-radius: 4px;
+  font-size: 12px;
+}
+.related-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4px;
+}
+.related-project { background: #2a4a6a; color: #aac8ee; }
+.related-time { color: #666; font-size: 10px; }
+.related-title {
+  color: #d8d8d8; font-size: 11px; margin-bottom: 4px;
+}
+.related-metrics {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  font-size: 10px; color: #888; margin-bottom: 6px;
+}
+.related-metrics .metric b { color: #c8d8e8; margin-left: 3px; }
+.related-open {
+  padding: 3px 10px; font-size: 11px;
+  background: #2a4a6a; color: #aac8ee;
+  border: none; border-radius: 3px; cursor: pointer;
+}
+.related-open:hover { background: #3a5a7a; }
+
 .plan-card {
   padding: 12px; background: #232323; border: 1px solid #333;
   border-radius: 6px; display: flex; flex-direction: column; gap: 10px;
@@ -205,12 +245,8 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 .crispr-actions {
   display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;
 }
-.crispr-actions button {
-  align-self: auto;
-}
-.crispr-actions .batch-btn {
-  background: #3a2a5a;
-}
+.crispr-actions button { align-self: auto; }
+.crispr-actions .batch-btn { background: #3a2a5a; }
 .crispr-actions .batch-btn:hover:not(:disabled) { background: #4a3a6a; }
 
 .fasta-upload { display: inline-flex; align-items: center; gap: 8px; }

@@ -97,6 +97,10 @@ export function App() {
             projectId={selectedProjectId}
             onPlanCreated={() => bump()}
             onExperimentSaved={() => bump("Plan saved")}
+            onOpenProject={(pid) => {
+              setSelectedProjectId(pid);
+              bump();
+            }}
           />
           <WarningsPanel
             projectId={selectedProjectId}
