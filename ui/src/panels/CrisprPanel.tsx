@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { designGuides, findOffTargets } from "@/lib/crisprApi";
+import { createExperiment } from "@/lib/projectsApi";
 import { GuideList } from "@/components/GuideList";
 import { OffTargetList } from "@/components/OffTargetList";
 import type { Guide } from "@/types/guide";
@@ -10,16 +11,20 @@ const EXAMPLE =
 
 const OFF_TARGET_REF =
   "ACGTACGTACGTACGTACGTCGGGGGGCCCCGGGGCCCCGGGGAGGTTTTAAAATTTTAAAATTTT" +
-  "ACGTACGTACGTACGTTCGTCGGGGGGCCCCGGGGCCCCGGGGA GG".replace(/ /g, "") +
+  "ACGTACGTACGTACGTTCGTCGGGGGGCCCCGGGGCCCCGGGGAGG" +
   "ACGTACGTACGTACGTACGTAGGTTTTAAAATTTTAAAATTTT";
 
-export function CrisprPanel() {
+interface Props {
+  projectId: number | null;
+  onExperimentSaved?: () => void;
+}
+
+export function CrisprPanel({ projectId, onExperimentSaved }: Props) {
   const [sequence, setSequence] = useState(EXAMPLE);
   const [guides, setGuides] = useState<Guide[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // off-target state
   const [selectedGuide, setSelectedGuide] = useState<string | null>(null);
   const [reference, setReference] = useState(OFF_TARGET_REF);
   const [offTarget, setOffTarget] = useState<OffTargetResult | null>(null);
@@ -37,6 +42,18 @@ export function CrisprPanel() {
       setGuides(result);
       setSelectedGuide(result[0]?.spacer ?? null);
       setOffTarget(null);
+
+      if (projectId !== null && result.length > 0) {
+        try {
+          const title = String(result.length) + " gRNAs for " + seq.slice(0, 20) + "...";
+          await createExperiment(projectId, "crispr_design", title, {
+            guides: result,
+          });
+          if (onExperimentSaved) onExperimentSaved();
+        } catch (persistErr) {
+          console.warn("Failed to save crispr experiment:", persistErr);
+        }
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
       setGuides([]);
@@ -60,6 +77,21 @@ export function CrisprPanel() {
         referenceLabel: "ref",
       });
       setOffTarget(result);
+
+      if (projectId !== null) {
+        try {
+          const title =
+            "Off-target for " +
+            selectedGuide.slice(0, 10) +
+            "... (" +
+            String(result.summary.total) +
+            " hits)";
+          await createExperiment(projectId, "offtarget", title, result);
+          if (onExperimentSaved) onExperimentSaved();
+        } catch (persistErr) {
+          console.warn("Failed to save offtarget experiment:", persistErr);
+        }
+      }
     } catch (e) {
       setOtError(e instanceof Error ? e.message : "Unknown error");
       setOffTarget(null);
@@ -83,7 +115,7 @@ export function CrisprPanel() {
         </button>
       </div>
 
-      {error && <div className="chat-error">Ошибка: {error}</div>}
+      {error && <div className="chat-error">Error: {error}</div>}
 
       {guides.length > 0 && (
         <div className="guide-selector">
@@ -124,7 +156,7 @@ export function CrisprPanel() {
         </div>
       )}
 
-      {otError && <div className="chat-error">Ошибка: {otError}</div>}
+      {otError && <div className="chat-error">Error: {otError}</div>}
 
       {offTarget && <OffTargetList result={offTarget} />}
     </div>

@@ -1,4 +1,5 @@
 export { ProjectsPanel } from "./ProjectsPanel";
+export { ExperimentsPanel } from "./ExperimentsPanel";
 export { ChatPanel } from "./ChatPanel";
 export { CrisprPanel } from "./CrisprPanel";
 export { SimulationPanel } from "./SimulationPanel";

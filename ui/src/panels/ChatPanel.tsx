@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { fetchPlan } from "@/lib/api";
+import { createExperiment } from "@/lib/projectsApi";
 import { PlanCard } from "@/components/PlanCard";
 import type { Plan } from "@/types/plan";
 
 interface Props {
   projectId: number | null;
   onPlanCreated?: () => void;
+  onExperimentSaved?: () => void;
 }
 
 interface PlanEntry {
@@ -13,7 +15,7 @@ interface PlanEntry {
   plan: Plan;
 }
 
-export function ChatPanel({ projectId, onPlanCreated }: Props) {
+export function ChatPanel({ projectId, onPlanCreated, onExperimentSaved }: Props) {
   const [text, setText] = useState("");
   const [plans, setPlans] = useState<PlanEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +31,20 @@ export function ChatPanel({ projectId, onPlanCreated }: Props) {
       const plan = await fetchPlan(trimmed, projectId ?? undefined);
       setPlans((prev) => [{ id: Date.now(), plan }, ...prev]);
       setText("");
-      if (projectId !== null && onPlanCreated) {
-        onPlanCreated();
+      if (projectId !== null) {
+        if (onPlanCreated) onPlanCreated();
+        try {
+          const title =
+            plan.goal.intent +
+            " " +
+            plan.goal.target.gene +
+            " in " +
+            plan.goal.target.organism;
+          await createExperiment(projectId, "plan", title, plan);
+          if (onExperimentSaved) onExperimentSaved();
+        } catch (persistErr) {
+          console.warn("Failed to save experiment:", persistErr);
+        }
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
@@ -55,8 +69,8 @@ export function ChatPanel({ projectId, onPlanCreated }: Props) {
           onKeyDown={onKeyDown}
           placeholder={
             projectId !== null
-              ? 'Goal (warnings will attach to project): "knockout gene recA in E. coli"'
-              : 'Example: "knockout gene lacZ in E. coli" — select a project to attach warnings'
+              ? 'Goal (will be saved to project): "knockout gene recA in E. coli"'
+              : 'Example: "knockout gene lacZ in E. coli" - select a project to save'
           }
           rows={3}
           disabled={loading}
@@ -71,7 +85,7 @@ export function ChatPanel({ projectId, onPlanCreated }: Props) {
       <div className="chat-results">
         {plans.length === 0 && !error && (
           <div className="chat-empty">
-            Describe a goal — the system will propose a strategy and a plan.
+            Describe a goal - the system will propose a strategy and a plan.
           </div>
         )}
         {plans.map((entry) => (

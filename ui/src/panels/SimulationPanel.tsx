@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { simulateEdit } from "@/lib/simulationApi";
+import { createExperiment } from "@/lib/projectsApi";
 import { downloadFasta, downloadGenbank, downloadVcf } from "@/lib/exportApi";
 import { ConsequenceTree } from "@/components/ConsequenceTree";
 import type { SimulateEditResponse } from "@/types/simulation";
@@ -9,9 +10,10 @@ const EXAMPLE_SEQ = "ATG" + "GCT".repeat(20) + "TAA";
 interface Props {
   projectId: number | null;
   onSimulated?: () => void;
+  onExperimentSaved?: () => void;
 }
 
-export function SimulationPanel({ projectId, onSimulated }: Props) {
+export function SimulationPanel({ projectId, onSimulated, onExperimentSaved }: Props) {
   const [sequence, setSequence] = useState(EXAMPLE_SEQ);
   const [geneName, setGeneName] = useState("testGene");
   const [kind, setKind] = useState<"substitution" | "insertion" | "deletion">(
@@ -46,8 +48,20 @@ export function SimulationPanel({ projectId, onSimulated }: Props) {
         project_id: projectId ?? undefined,
       });
       setResult(r);
-      if (projectId !== null && onSimulated) {
-        onSimulated();
+      if (projectId !== null) {
+        if (onSimulated) onSimulated();
+        try {
+          const title =
+            geneName +
+            ": " +
+            r.effect.effect_type +
+            " at pos " +
+            String(position);
+          await createExperiment(projectId, "simulation", title, r);
+          if (onExperimentSaved) onExperimentSaved();
+        } catch (persistErr) {
+          console.warn("Failed to save simulation experiment:", persistErr);
+        }
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");

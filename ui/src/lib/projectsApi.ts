@@ -60,3 +60,12 @@ export async function createExperiment(
   const data = await jsonOrError<{ experiment: Experiment }>(r);
   return data.experiment;
 }
+
+export async function deleteExperiment(experimentId: number): Promise<void> {
+  const r = await fetch(API_BASE + "/experiments/" + experimentId, {
+    method: "DELETE",
+  });
+  if (!r.ok) {
+    throw new ApiError(r.status, "HTTP " + r.status);
+  }
+}

@@ -1,22 +1,24 @@
 import { useState } from "react";
 import { runNgs, runSanger } from "@/lib/sequencingApi";
+import { createExperiment } from "@/lib/projectsApi";
 import { Chromatogram } from "@/components/Chromatogram";
 import type { NgsResponse, SangerResponse } from "@/types/sequencing";
 
 const WT = "ATG" + "GCT".repeat(20) + "TAA";
-const EDITED = "ATG" + "GCT".repeat(20) + "TAG"; // last base changed
+const EDITED = "ATG" + "GCT".repeat(20) + "TAG";
 
 interface Props {
   projectId: number | null;
+  onExperimentSaved?: () => void;
 }
 
-export function SequencingPanel({ projectId: _projectId }: Props) {
+export function SequencingPanel({ projectId, onExperimentSaved }: Props) {
   const [wtSeq, setWtSeq] = useState(WT);
   const [editedSeq, setEditedSeq] = useState(EDITED);
   const [editedFraction, setEditedFraction] = useState(0.5);
   const [hetFraction, setHetFraction] = useState(0.0);
   const [totalReads, setTotalReads] = useState(1000);
-  const [window_, setWindow] = useState(40);
+  const [win, setWin] = useState(40);
 
   const [sanger, setSanger] = useState<SangerResponse | null>(null);
   const [ngs, setNgs] = useState<NgsResponse | null>(null);
@@ -33,11 +35,27 @@ export function SequencingPanel({ projectId: _projectId }: Props) {
         edited_fraction: editedFraction,
         heterozygote_fraction: hetFraction,
         total_reads: totalReads,
-        window: window_,
+        window: win,
       };
       const [s, n] = await Promise.all([runSanger(req), runNgs(req)]);
       setSanger(s);
       setNgs(n);
+
+      if (projectId !== null) {
+        try {
+          const title =
+            "Sanger+NGS (edited " +
+            String(Math.round(editedFraction * 100)) +
+            "%)";
+          await createExperiment(projectId, "sequencing", title, {
+            sanger: s,
+            ngs: n,
+          });
+          if (onExperimentSaved) onExperimentSaved();
+        } catch (persistErr) {
+          console.warn("Failed to save sequencing experiment:", persistErr);
+        }
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
       setSanger(null);
@@ -108,8 +126,8 @@ export function SequencingPanel({ projectId: _projectId }: Props) {
             type="number"
             min={5}
             step={5}
-            value={window_}
-            onChange={(e) => setWindow(parseInt(e.target.value) || 40)}
+            value={win}
+            onChange={(e) => setWin(parseInt(e.target.value) || 40)}
           />
         </label>
       </div>

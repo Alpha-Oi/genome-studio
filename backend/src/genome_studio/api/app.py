@@ -17,6 +17,7 @@ from genome_studio.data import (
     NotFoundError,
     create_experiment,
     create_project,
+    delete_experiment,
     delete_project,
     dispose_engine,
     get_project,
@@ -52,8 +53,6 @@ from genome_studio.warnings import (
     warnings_from_plan,
 )
 
-
-# --- Schemas -------------------------------------------------------------
 
 class GoalRequest(BaseModel):
     text: str
@@ -165,8 +164,6 @@ class AcknowledgeRequest(BaseModel):
     note: str = Field(..., min_length=1, max_length=2000)
 
 
-# --- Helpers -------------------------------------------------------------
-
 def _clean_dna(seq: str) -> str:
     seq = seq.upper()
     return "".join(b for b in seq if b in "ACGTN")
@@ -187,8 +184,6 @@ def _parse_edit(req) -> Edit:
         alt=req.alt.upper(),
     )
 
-
-# --- App factory ---------------------------------------------------------
 
 def create_app() -> FastAPI:
     info = resolve_build()
@@ -232,8 +227,6 @@ def create_app() -> FastAPI:
             "isolated_environment": info.isolated_environment,
         }
 
-    # --- Goal / Plan ---------------------------------------------------
-
     @app.post("/goal", response_model=PlanResponse)
     async def create_goal(
         req: GoalRequest,
@@ -266,8 +259,6 @@ def create_app() -> FastAPI:
 
         return PlanResponse(plan=plan.to_dict(), warning_ids=warning_ids)
 
-    # --- CRISPR --------------------------------------------------------
-
     @app.post("/crispr/design", response_model=CrisprResponse)
     async def crispr_design(req: CrisprRequest) -> CrisprResponse:
         seq = _clean_dna(req.sequence)
@@ -299,8 +290,6 @@ def create_app() -> FastAPI:
         )
         summary = off_target_risk(hits)
         return OffTargetResponse(hits=[h.to_dict() for h in hits], summary=summary)
-
-    # --- Simulation ----------------------------------------------------
 
     @app.post("/simulate/edit", response_model=SimulateEditResponse)
     async def simulate_edit(
@@ -364,12 +353,8 @@ def create_app() -> FastAPI:
         except ValueError as e:
             raise HTTPException(status_code=422, detail=str(e)) from e
 
-        # find edit window (first position where they differ)
         diffs = [i for i in range(len(wt)) if wt[i] != edited[i]]
-        if not diffs:
-            edit_pos = len(wt) // 2
-        else:
-            edit_pos = diffs[0]
+        edit_pos = diffs[0] if diffs else len(wt) // 2
 
         half = req.window // 2
         start = max(0, edit_pos - half)
@@ -409,8 +394,6 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=422, detail=str(e)) from e
 
         return summary.to_dict()
-
-    # --- Export --------------------------------------------------------
 
     @app.post("/export/edit/fasta")
     async def export_fasta(req: ExportEditRequest) -> Response:
@@ -474,8 +457,6 @@ def create_app() -> FastAPI:
             },
         )
 
-    # --- Projects ------------------------------------------------------
-
     @app.get("/projects", response_model=ProjectListResponse)
     async def projects_list(
         session: AsyncSession = Depends(get_session),
@@ -515,8 +496,6 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail=str(e)) from e
         return {"status": "deleted", "id": project_id}
 
-    # --- Experiments ---------------------------------------------------
-
     @app.get(
         "/projects/{project_id}/experiments",
         response_model=ExperimentListResponse,
@@ -553,7 +532,16 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         return ExperimentResponse(experiment=e.to_dict())
 
-    # --- Warnings ------------------------------------------------------
+    @app.delete("/experiments/{experiment_id}")
+    async def experiments_delete(
+        experiment_id: int,
+        session: AsyncSession = Depends(get_session),
+    ) -> dict:
+        try:
+            await delete_experiment(session, experiment_id)
+        except NotFoundError as e:
+            raise HTTPException(status_code=404, detail=str(e)) from e
+        return {"status": "deleted", "id": experiment_id}
 
     @app.get(
         "/projects/{project_id}/warnings",

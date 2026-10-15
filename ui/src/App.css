@@ -6,9 +6,7 @@
 }
 
 * { box-sizing: border-box; }
-
 body, html, #root { margin: 0; padding: 0; height: 100%; }
-
 .app { display: flex; flex-direction: column; height: 100vh; }
 
 .app-header {
@@ -16,14 +14,12 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   padding: 8px 16px; background: #0f0f0f;
   border-bottom: 1px solid #333;
 }
-
 .app-header h1 { font-size: 16px; margin: 0; }
 
 .build-badge {
   font-size: 11px; padding: 2px 8px; border-radius: 4px;
   background: #2a4a2a; color: #b8e0b8;
 }
-
 .project-badge {
   font-size: 11px; padding: 2px 8px; border-radius: 4px;
   background: #2a3a5a; color: #aac8ee;
@@ -31,26 +27,22 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 
 .app-main {
   flex: 1; display: grid;
-  grid-template-columns: 240px 1fr 480px;
+  grid-template-columns: 260px 1fr 480px;
   overflow: hidden;
 }
-
 .app-sidebar, .app-center, .app-right {
   overflow: auto; padding: 12px; border-right: 1px solid #333;
 }
-
 .app-right { border-right: none; border-left: 1px solid #333; }
 
 .panel {
   margin-bottom: 16px; padding: 12px;
   background: #232323; border-radius: 6px;
 }
-
 .panel h2 {
   font-size: 13px; margin: 0 0 8px;
   color: #888; text-transform: uppercase; letter-spacing: 0.5px;
 }
-
 .panel p { margin: 0; color: #666; font-size: 12px; }
 
 .dev-panel { background: #4a2020; border: 1px solid #803030; }
@@ -221,9 +213,7 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   display: flex; align-items: center; gap: 6px; justify-content: flex-end;
   flex-wrap: wrap;
 }
-
 .sim-actions-label { font-size: 11px; color: #888; margin-left: 8px; }
-
 .sim-actions button {
   padding: 6px 14px; font-size: 13px;
   background: #2a5a8a; color: #fff; border: none;
@@ -231,7 +221,6 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 }
 .sim-actions button:hover:not(:disabled) { background: #3a6a9a; }
 .sim-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
-
 .sim-actions .export-btn {
   background: #3a3a3a; padding: 5px 10px; font-size: 11px;
 }
@@ -254,6 +243,7 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   word-break: break-all;
   padding: 8px; background: #1a1a1a; border-radius: 4px;
   margin: 6px 0 0;
+  max-height: 300px; overflow: auto;
 }
 
 details summary {
@@ -321,6 +311,35 @@ details summary {
 }
 .project-list .pdelete:hover { color: #ff8888; }
 
+/* Experiments panel */
+.experiment-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.experiment-item {
+  padding: 6px 8px; background: #2a2a2a; border-radius: 4px;
+  font-size: 12px;
+}
+.experiment-head {
+  display: flex; gap: 6px; align-items: center;
+  margin-bottom: 4px;
+}
+.exp-kind { background: #2a3a5a; color: #aac8ee; }
+.exp-time { flex: 1; color: #666; font-size: 10px; }
+.exp-delete {
+  background: transparent; border: none; color: #888;
+  font-size: 14px; cursor: pointer; padding: 0 4px;
+}
+.exp-delete:hover { color: #ff8888; }
+.experiment-title {
+  color: #d8d8d8; font-size: 11px;
+  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; margin-bottom: 4px;
+}
+.experiment-details summary {
+  font-size: 10px; color: #666;
+}
+
 /* Warnings panel */
 .warnings-filter {
   display: flex; gap: 4px; margin-bottom: 10px;
@@ -378,12 +397,8 @@ details summary {
   padding: 8px; background: #1a1a1a; border-radius: 4px;
   overflow-x: auto;
 }
-.chromatogram {
-  display: block;
-}
-.chromatogram-note {
-  font-size: 11px; color: #888; margin: 6px 0 0;
-}
+.chromatogram { display: block; }
+.chromatogram-note { font-size: 11px; color: #888; margin: 6px 0 0; }
 .allele-chips {
   display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;
 }

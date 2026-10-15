@@ -4,6 +4,7 @@ import {
   ChatPanel,
   CrisprPanel,
   DevPanel,
+  ExperimentsPanel,
   ProjectsPanel,
   SequencingPanel,
   SimulationPanel,
@@ -15,10 +16,10 @@ import "./App.css";
 export function App() {
   const build = getBuildInfo();
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
-  const [warningsRefreshKey, setWarningsRefreshKey] = useState(0);
+  const [sideRefreshKey, setSideRefreshKey] = useState(0);
 
-  function bumpWarnings() {
-    setWarningsRefreshKey((k) => k + 1);
+  function bump() {
+    setSideRefreshKey((k) => k + 1);
   }
 
   return (
@@ -37,26 +38,38 @@ export function App() {
             selectedId={selectedProjectId}
             onSelect={setSelectedProjectId}
           />
+          <ExperimentsPanel
+            projectId={selectedProjectId}
+            refreshKey={sideRefreshKey}
+          />
         </aside>
 
         <section className="app-center">
           <BrowserPanel />
-          <CrisprPanel />
+          <CrisprPanel
+            projectId={selectedProjectId}
+            onExperimentSaved={bump}
+          />
           <SimulationPanel
             projectId={selectedProjectId}
-            onSimulated={bumpWarnings}
+            onSimulated={bump}
+            onExperimentSaved={bump}
           />
-          <SequencingPanel projectId={selectedProjectId} />
+          <SequencingPanel
+            projectId={selectedProjectId}
+            onExperimentSaved={bump}
+          />
         </section>
 
         <aside className="app-right">
           <ChatPanel
             projectId={selectedProjectId}
-            onPlanCreated={bumpWarnings}
+            onPlanCreated={bump}
+            onExperimentSaved={bump}
           />
           <WarningsPanel
             projectId={selectedProjectId}
-            refreshKey={warningsRefreshKey}
+            refreshKey={sideRefreshKey}
           />
           <DevPanel />
         </aside>

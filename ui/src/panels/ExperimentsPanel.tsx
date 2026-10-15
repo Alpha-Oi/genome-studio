@@ -1,0 +1,93 @@
+import { useEffect, useState } from "react";
+import {
+  deleteExperiment,
+  listExperiments,
+} from "@/lib/projectsApi";
+import type { Experiment } from "@/types/project";
+
+interface Props {
+  projectId: number | null;
+  refreshKey?: number;
+}
+
+export function ExperimentsPanel({ projectId, refreshKey = 0 }: Props) {
+  const [experiments, setExperiments] = useState<Experiment[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  async function refresh() {
+    if (projectId === null) {
+      setExperiments([]);
+      return;
+    }
+    setError(null);
+    try {
+      const items = await listExperiments(projectId);
+      setExperiments(items);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    }
+  }
+
+  useEffect(() => {
+    void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, refreshKey]);
+
+  async function remove(id: number) {
+    if (!confirm("Delete experiment?")) return;
+    try {
+      await deleteExperiment(id);
+      setExperiments((prev) => prev.filter((e) => e.id !== id));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    }
+  }
+
+  if (projectId === null) {
+    return (
+      <div className="panel">
+        <h2>Experiments</h2>
+        <p>Select a project to see its experiments.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="panel">
+      <h2>Experiments ({experiments.length})</h2>
+
+      {error && <div className="chat-error">Error: {error}</div>}
+
+      {experiments.length === 0 ? (
+        <p>No experiments yet.</p>
+      ) : (
+        <ul className="experiment-list">
+          {experiments.map((e) => (
+            <li key={e.id} className="experiment-item">
+              <div className="experiment-head">
+                <span className="badge exp-kind">{e.kind}</span>
+                <span className="exp-time">
+                  {new Date(e.created_at).toLocaleTimeString()}
+                </span>
+                <button
+                  className="exp-delete"
+                  onClick={() => void remove(e.id)}
+                  title="Delete"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="experiment-title">{e.title || "(no title)"}</div>
+              <details className="experiment-details">
+                <summary>payload</summary>
+                <pre className="seq-mono">
+                  {JSON.stringify(e.payload, null, 2)}
+                </pre>
+              </details>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
