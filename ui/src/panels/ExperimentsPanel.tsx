@@ -26,6 +26,21 @@ function formatDate(iso: string): string {
   return date + " " + time;
 }
 
+function downloadExperimentJson(exp: Experiment): void {
+  const blob = new Blob([JSON.stringify(exp, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const safeTitle = exp.title.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 40);
+  a.download = "exp_" + exp.id + "_" + (safeTitle || "experiment") + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export function ExperimentsPanel({ projectId, refreshKey = 0, onExperimentSaved }: Props) {
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +139,13 @@ export function ExperimentsPanel({ projectId, refreshKey = 0, onExperimentSaved 
               <div className="experiment-head">
                 <span className="badge exp-kind">{e.kind}</span>
                 <span className="exp-time">{formatDate(e.created_at)}</span>
+                <button
+                  className="exp-action"
+                  onClick={() => downloadExperimentJson(e)}
+                  title="Download JSON"
+                >
+                  {"{}"}
+                </button>
                 <button
                   className="exp-action"
                   onClick={() => void duplicate(e)}

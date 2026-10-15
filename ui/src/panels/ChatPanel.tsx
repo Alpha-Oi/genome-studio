@@ -2,6 +2,7 @@ import { useState } from "react";
 import { fetchPlan } from "@/lib/api";
 import { createExperiment } from "@/lib/projectsApi";
 import { PlanCard } from "@/components/PlanCard";
+import { GoalTemplates } from "@/components/GoalTemplates";
 import type { Plan } from "@/types/plan";
 
 interface Props {
@@ -60,8 +61,14 @@ export function ChatPanel({ projectId, onPlanCreated, onExperimentSaved }: Props
     }
   }
 
+  function pickTemplate(t: string) {
+    setText(t);
+  }
+
   return (
     <div className="chat-panel">
+      <GoalTemplates onPick={pickTemplate} />
+
       <div className="chat-input">
         <textarea
           value={text}
