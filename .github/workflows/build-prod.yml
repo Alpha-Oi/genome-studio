@@ -1,0 +1,87 @@
+name: Build PROD
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build-prod:
+    name: Build and verify PROD
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - uses: dtolnay/rust-toolchain@stable
+
+      - run: uv python install 3.12
+      - run: uv sync --no-dev
+
+      # Rust — без dev-флагов
+      - name: Build Rust (no dev features)
+        working-directory: core-rs
+        run: cargo build --release --no-default-features
+
+      # Жёсткая проверка: нет dev-флагов в prod
+      - name: Assert no dev_override in prod
+        run: |
+          if grep -r "dev_override" core-rs/src --include="*.rs" | grep -v "cfg(not" | grep -v "//"; then
+            echo "ERROR: dev_override found in prod-critical code"
+            exit 1
+          fi
+          echo "OK: no dev_override in prod code path"
+
+      - name: Assert T2 always enabled
+        run: |
+          if grep -rn "t2_override = true" build/prod.toml; then
+            echo "ERROR: t2_override enabled in prod config"
+            exit 1
+          fi
+          echo "OK: T2 hard-locked in prod"
+
+      - name: Assert no dev_panel in UI
+        run: |
+          if grep -rn "dev_panel" ui/src 2>/dev/null; then
+            echo "ERROR: dev_panel referenced in UI prod code"
+            exit 1
+          fi
+          echo "OK: no dev_panel in UI"
+
+      - name: Check prod build config
+        run: |
+          echo "Prod config:"
+          cat build/prod.toml
+
+  verify-dev-separation:
+    name: Verify dev/prod separation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert dev config requires signing key
+        run: |
+          if ! grep -q 'require_signing_key = true' build/dev.toml; then
+            echo "ERROR: dev.toml must require signing key"
+            exit 1
+          fi
+          echo "OK: dev requires signing key"
+
+      - name: Assert dev config disables export
+        run: |
+          if ! grep -q 'export = "disabled"' build/dev.toml; then
+            echo "ERROR: dev.toml must disable export"
+            exit 1
+          fi
+          echo "OK: dev export disabled"
+
+      - name: Assert dev config requires loopback only
+        run: |
+          if ! grep -q 'network = "loopback_only"' build/dev.toml; then
+            echo "ERROR: dev.toml must require loopback only"
+            exit 1
+          fi
+          echo "OK: dev loopback only"
