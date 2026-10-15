@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/Alpha-Oi/genome-studio/tree/main/docs
+    about: Перед созданием issue — проверь документацию
+  - name: Discussions
+    url: https://github.com/Alpha-Oi/genome-studio/discussions
+    about: Вопросы, идеи, обсуждения
