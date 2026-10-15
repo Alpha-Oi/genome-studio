@@ -20,6 +20,13 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   font-size: 11px; padding: 2px 8px; border-radius: 4px;
   background: #2a4a2a; color: #b8e0b8;
 }
+.mode-badge {
+  font-size: 11px; padding: 2px 8px; border-radius: 4px;
+  font-weight: bold;
+}
+.mode-local { background: #2a4a2a; color: #b8e0b8; }
+.mode-multi { background: #2a3a5a; color: #aac8ee; }
+
 .project-badge {
   font-size: 11px; padding: 2px 8px; border-radius: 4px;
   background: #2a3a5a; color: #aac8ee;
@@ -53,6 +60,44 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
   border-top: 1px solid #333;
   font-size: 11px; color: #666;
 }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+  background: #2a5a2a; color: #b8e0b8;
+  padding: 8px 20px; border-radius: 6px;
+  font-size: 13px; font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 1000;
+  animation: toast-in 0.2s ease-out;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* CenterTabs */
+.center-tabs {
+  display: flex; flex-direction: column; gap: 0; height: 100%;
+}
+.tabs-bar {
+  display: flex; gap: 2px;
+  border-bottom: 1px solid #333;
+  margin: -12px -12px 12px -12px;
+  padding: 0 8px;
+}
+.tabs-bar .tab {
+  padding: 8px 16px; font-size: 12px;
+  background: transparent; color: #888;
+  border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; text-transform: uppercase;
+  letter-spacing: 0.5px; font-weight: 500;
+}
+.tabs-bar .tab:hover { color: #d8d8d8; }
+.tabs-bar .tab.active {
+  color: #aac8ee; border-bottom-color: #4a8ac8;
+}
+.tabs-body { flex: 1; overflow: auto; }
 
 /* Chat */
 .chat-panel { display: flex; flex-direction: column; gap: 12px; height: 100%; }
@@ -124,7 +169,7 @@ body, html, #root { margin: 0; padding: 0; height: 100%; }
 }
 
 /* CRISPR / Simulation */
-.crispr-panel { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.crispr-panel { display: flex; flex-direction: column; gap: 12px; }
 .crispr-input { display: flex; flex-direction: column; gap: 6px; }
 .crispr-input label { font-size: 12px; color: #888; }
 .crispr-input textarea {

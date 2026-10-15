@@ -1,19 +1,22 @@
 """PDF report generation with reportlab.
 
-Uses the platypus (flowables) API for layout:
-paragraphs, tables, spacers. No canvas drawing.
+Uses the platypus (flowables) API. Registers DejaVu Sans if available
+for full Unicode (Cyrillic, etc.); falls back to Helvetica otherwise.
 """
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
 from io import BytesIO
+from pathlib import Path
 from typing import Any
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     PageBreak,
     Paragraph,
@@ -24,6 +27,38 @@ from reportlab.platypus import (
 )
 
 from genome_studio import __version__
+
+
+_FONTS_DIR = Path(__file__).parent / "fonts"
+
+
+def _register_fonts() -> tuple[str, str]:
+    """Register DejaVu fonts if present.
+
+    Returns (regular_font_name, bold_font_name).
+    """
+    regular = _FONTS_DIR / "DejaVuSans.ttf"
+    bold = _FONTS_DIR / "DejaVuSans-Bold.ttf"
+
+    if regular.exists() and bold.exists():
+        try:
+            pdfmetrics.registerFont(TTFont("DejaVuSans", str(regular)))
+            pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", str(bold)))
+            pdfmetrics.registerFontFamily(
+                "DejaVuSans",
+                normal="DejaVuSans",
+                bold="DejaVuSans-Bold",
+                italic="DejaVuSans",
+                boldItalic="DejaVuSans-Bold",
+            )
+            return "DejaVuSans", "DejaVuSans-Bold"
+        except Exception:
+            pass
+
+    return "Helvetica", "Helvetica-Bold"
+
+
+_REGULAR, _BOLD = _register_fonts()
 
 
 def _safe(text: Any) -> str:
@@ -37,29 +72,58 @@ def _safe(text: Any) -> str:
 
 def _styles() -> dict[str, ParagraphStyle]:
     ss = getSampleStyleSheet()
+    body = ParagraphStyle(
+        name="BodyTextCustom",
+        parent=ss["BodyText"],
+        fontName=_REGULAR,
+        fontSize=10,
+        leading=13,
+    )
+    heading1 = ParagraphStyle(
+        name="Heading1Custom",
+        parent=ss["Heading1"],
+        fontName=_BOLD,
+        fontSize=18,
+        leading=22,
+    )
+    heading2 = ParagraphStyle(
+        name="Heading2Custom",
+        parent=ss["Heading2"],
+        fontName=_BOLD,
+        fontSize=14,
+        leading=18,
+    )
+    heading3 = ParagraphStyle(
+        name="Heading3Custom",
+        parent=ss["Heading3"],
+        fontName=_BOLD,
+        fontSize=11,
+        leading=14,
+    )
+    small = ParagraphStyle(
+        name="Small",
+        parent=body,
+        fontSize=9,
+        textColor=colors.grey,
+    )
+    mono = ParagraphStyle(
+        name="Mono",
+        parent=body,
+        fontName="Courier",
+        fontSize=8,
+        leading=10,
+    )
     return {
-        "title": ss["Heading1"],
-        "h2": ss["Heading2"],
-        "h3": ss["Heading3"],
-        "body": ss["BodyText"],
-        "small": ParagraphStyle(
-            name="Small",
-            parent=ss["BodyText"],
-            fontSize=9,
-            textColor=colors.grey,
-        ),
-        "mono": ParagraphStyle(
-            name="Mono",
-            parent=ss["BodyText"],
-            fontName="Courier",
-            fontSize=8,
-            leading=10,
-        ),
+        "title": heading1,
+        "h2": heading2,
+        "h3": heading3,
+        "body": body,
+        "small": small,
+        "mono": mono,
     }
 
 
 def _kv_table(rows: list[tuple[str, str]], styles: dict[str, ParagraphStyle]) -> Table:
-    """Two-column key-value table."""
     data = [
         [Paragraph(f"<b>{_safe(k)}</b>", styles["body"]),
          Paragraph(_safe(v), styles["body"])]
@@ -75,10 +139,10 @@ def _kv_table(rows: list[tuple[str, str]], styles: dict[str, ParagraphStyle]) ->
     return t
 
 
-def _two_col_table(header: list[str], rows: list[list[str]]) -> Table:
-    data = [[Paragraph(f"<b>{_safe(h)}</b>", getSampleStyleSheet()["BodyText"]) for h in header]]
+def _two_col_table(header: list[str], rows: list[list[str]], styles) -> Table:
+    data = [[Paragraph(f"<b>{_safe(h)}</b>", styles["body"]) for h in header]]
     for row in rows:
-        data.append([Paragraph(_safe(c), getSampleStyleSheet()["BodyText"]) for c in row])
+        data.append([Paragraph(_safe(c), styles["body"]) for c in row])
     t = Table(data, repeatRows=1)
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e8e8e8")),
@@ -176,7 +240,7 @@ def _render_plan(exp: dict, styles) -> list:
         out.append(Paragraph("<b>Steps:</b>", styles["body"]))
         rows = [[str(s.get("order", "?")), s.get("action", "?"), s.get("description", "?")]
                 for s in steps]
-        out.append(_two_col_table(["#", "Action", "Description"], rows))
+        out.append(_two_col_table(["#", "Action", "Description"], rows, styles))
     return out
 
 
@@ -194,7 +258,7 @@ def _render_guides(exp: dict, styles) -> list:
         for i, g in enumerate(guides)
     ]
     out.append(_two_col_table(
-        ["#", "Spacer", "PAM", "Strand", "GC", "Score"], rows,
+        ["#", "Spacer", "PAM", "Strand", "GC", "Score"], rows, styles,
     ))
     return out
 
@@ -219,7 +283,7 @@ def _render_offtarget(exp: dict, styles) -> list:
             for i, h in enumerate(hits[:20])
         ]
         out.append(_two_col_table(
-            ["#", "Locus", "Strand", "MM", "Spacer"], rows,
+            ["#", "Locus", "Strand", "MM", "Spacer"], rows, styles,
         ))
         if len(hits) > 20:
             out.append(Paragraph(
@@ -265,7 +329,7 @@ def _render_sequencing(exp: dict, styles) -> list:
     alleles = sanger.get("alleles") or ngs.get("alleles") or []
     if alleles:
         rows = [[a.get("name", "?"), f"{a.get('fraction', 0):.2f}"] for a in alleles]
-        out.append(_two_col_table(["Allele", "Fraction"], rows))
+        out.append(_two_col_table(["Allele", "Fraction"], rows, styles))
 
     if ngs:
         out.append(Spacer(1, 0.2 * cm))
@@ -275,7 +339,6 @@ def _render_sequencing(exp: dict, styles) -> list:
 
 def _render_experiments(experiments: list[dict], styles) -> list:
     out: list = []
-    # pick latest of each kind
     latest: dict[str, dict] = {}
     for e in experiments:
         kind = e.get("kind", "?")
@@ -310,16 +373,7 @@ def build_project_pdf(
     experiments: list[dict],
     warnings: list[dict],
 ) -> bytes:
-    """Build a PDF report for a project.
-
-    Args:
-        project: project dict (from Project.to_dict()).
-        experiments: list of experiment dicts (from Experiment.to_dict()).
-        warnings: list of warning dicts (from Warning.to_dict()).
-
-    Returns:
-        PDF file bytes.
-    """
+    """Build a PDF report for a project."""
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,

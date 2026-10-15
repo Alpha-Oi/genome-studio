@@ -58,3 +58,4 @@ logs/dev/
 
 # Docker
 .docker/
+test_cyrillic.pdf

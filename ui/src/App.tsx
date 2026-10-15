@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BrowserPanel,
   ChatPanel,
@@ -10,23 +10,42 @@ import {
   SimulationPanel,
   WarningsPanel,
 } from "@/panels";
+import { CenterTabs } from "@/components/CenterTabs";
 import { getBuildInfo } from "@/lib/build-info";
+import { fetchMode } from "@/lib/modeApi";
 import "./App.css";
 
 export function App() {
   const build = getBuildInfo();
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [sideRefreshKey, setSideRefreshKey] = useState(0);
+  const [appMode, setAppMode] = useState<"local" | "multi" | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
-  function bump() {
+  function bump(message?: string) {
     setSideRefreshKey((k) => k + 1);
+    if (message) {
+      setToast(message);
+      window.setTimeout(() => setToast(null), 2000);
+    }
   }
+
+  useEffect(() => {
+    void fetchMode()
+      .then((m) => setAppMode(m.mode))
+      .catch(() => setAppMode(null));
+  }, []);
 
   return (
     <div className="app">
       <header className="app-header">
         <h1>Genome Studio</h1>
         <span className="build-badge">{build.mode}</span>
+        {appMode && (
+          <span className={"mode-badge mode-" + appMode}>
+            {appMode === "local" ? "LOCAL" : "SERVER"}
+          </span>
+        )}
         {selectedProjectId !== null && (
           <span className="project-badge">project #{selectedProjectId}</span>
         )}
@@ -45,27 +64,35 @@ export function App() {
         </aside>
 
         <section className="app-center">
-          <BrowserPanel />
-          <CrisprPanel
-            projectId={selectedProjectId}
-            onExperimentSaved={bump}
-          />
-          <SimulationPanel
-            projectId={selectedProjectId}
-            onSimulated={bump}
-            onExperimentSaved={bump}
-          />
-          <SequencingPanel
-            projectId={selectedProjectId}
-            onExperimentSaved={bump}
+          <CenterTabs
+            browser={<BrowserPanel />}
+            crispr={
+              <CrisprPanel
+                projectId={selectedProjectId}
+                onExperimentSaved={() => bump("CRISPR design saved")}
+              />
+            }
+            simulation={
+              <SimulationPanel
+                projectId={selectedProjectId}
+                onSimulated={() => bump()}
+                onExperimentSaved={() => bump("Simulation saved")}
+              />
+            }
+            sequencing={
+              <SequencingPanel
+                projectId={selectedProjectId}
+                onExperimentSaved={() => bump("Sequencing saved")}
+              />
+            }
           />
         </section>
 
         <aside className="app-right">
           <ChatPanel
             projectId={selectedProjectId}
-            onPlanCreated={bump}
-            onExperimentSaved={bump}
+            onPlanCreated={() => bump()}
+            onExperimentSaved={() => bump("Plan saved")}
           />
           <WarningsPanel
             projectId={selectedProjectId}
@@ -74,6 +101,8 @@ export function App() {
           <DevPanel />
         </aside>
       </main>
+
+      {toast && <div className="toast">✓ {toast}</div>}
 
       <footer className="app-footer">
         <span>v0.0.1</span>
