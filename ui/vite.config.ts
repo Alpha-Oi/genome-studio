@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isProd = mode === "production";
 
@@ -16,6 +15,13 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       strictPort: true,
+      proxy: {
+        "/api": {
+          target: "http://127.0.0.1:8000",
+          changeOrigin: true,
+          rewrite: (p: string) => p.replace(/^\/api/, ""),
+        },
+      },
     },
     build: {
       outDir: "dist",

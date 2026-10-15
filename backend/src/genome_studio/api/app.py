@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from genome_studio import __version__
@@ -12,8 +13,6 @@ from genome_studio.knowledge.seed import build_default_kg
 from genome_studio.reasoning.planner import build_plan
 
 
-# --- Schemas -------------------------------------------------------------
-
 class GoalRequest(BaseModel):
     text: str
 
@@ -21,8 +20,6 @@ class GoalRequest(BaseModel):
 class PlanResponse(BaseModel):
     plan: dict
 
-
-# --- App factory ---------------------------------------------------------
 
 def create_app() -> FastAPI:
     """Создаёт FastAPI-приложение."""
@@ -33,6 +30,18 @@ def create_app() -> FastAPI:
         version=__version__,
         docs_url="/docs" if info.mode.value != "prod" else None,
         redoc_url=None,
+    )
+
+    # CORS для dev-сервера Vite.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     kg = build_default_kg()
@@ -51,7 +60,6 @@ def create_app() -> FastAPI:
 
     @app.post("/goal", response_model=PlanResponse)
     async def create_goal(req: GoalRequest) -> PlanResponse:
-        """Parse natural-language goal -> plan."""
         try:
             goal = parse_goal(req.text)
         except ParseError as e:
