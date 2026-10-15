@@ -27,6 +27,7 @@ from genome_studio.data import (
 )
 from genome_studio.intent.parser import ParseError, parse_goal
 from genome_studio.knowledge.seed import build_default_kg
+from genome_studio.reasoning.mapper import map_goal
 from genome_studio.reasoning.planner import build_plan
 from genome_studio.simulation import (
     Edit,
@@ -36,16 +37,27 @@ from genome_studio.simulation import (
     build_consequence_tree,
     predict_effect,
 )
+from genome_studio.warnings import (
+    WarningError,
+    WarningStatus,
+    acknowledge_warning,
+    get_warning,
+    list_warnings,
+    warnings_from_effect,
+    warnings_from_plan,
+)
 
 
 # --- Schemas -------------------------------------------------------------
 
 class GoalRequest(BaseModel):
     text: str
+    project_id: int | None = None
 
 
 class PlanResponse(BaseModel):
     plan: dict
+    warning_ids: list[int] = []
 
 
 class CrisprRequest(BaseModel):
@@ -77,12 +89,14 @@ class SimulateEditRequest(BaseModel):
     position: int = Field(..., ge=0)
     ref: str = Field("", max_length=1000)
     alt: str = Field("", max_length=1000)
+    project_id: int | None = None
 
 
 class SimulateEditResponse(BaseModel):
     edited_sequence: str
     effect: dict
     consequence_tree: dict
+    warning_ids: list[int] = []
 
 
 class ProjectCreate(BaseModel):
@@ -111,6 +125,19 @@ class ExperimentResponse(BaseModel):
 
 class ExperimentListResponse(BaseModel):
     experiments: list[dict]
+
+
+class WarningListResponse(BaseModel):
+    warnings: list[dict]
+
+
+class WarningResponse(BaseModel):
+    warning: dict
+
+
+class AcknowledgeRequest(BaseModel):
+    by: str = Field(..., min_length=1, max_length=64)
+    note: str = Field(..., min_length=1, max_length=2000)
 
 
 # --- Helpers -------------------------------------------------------------
@@ -167,18 +194,36 @@ def create_app() -> FastAPI:
     # --- Goal / Plan ---------------------------------------------------
 
     @app.post("/goal", response_model=PlanResponse)
-    async def create_goal(req: GoalRequest) -> PlanResponse:
+    async def create_goal(
+        req: GoalRequest,
+        session: AsyncSession = Depends(get_session),
+    ) -> PlanResponse:
         try:
             goal = parse_goal(req.text)
         except ParseError as e:
             raise HTTPException(status_code=422, detail=str(e)) from e
 
+        iset = map_goal(goal, kg)
         try:
             plan = build_plan(goal, kg)
         except ValueError as e:
             raise HTTPException(status_code=500, detail=str(e)) from e
 
-        return PlanResponse(plan=plan.to_dict())
+        warning_ids: list[int] = []
+        if req.project_id is not None:
+            try:
+                await get_project(session, req.project_id)
+            except NotFoundError as e:
+                raise HTTPException(status_code=404, detail=str(e)) from e
+
+            warning_ids = await warnings_from_plan(
+                session,
+                project_id=req.project_id,
+                plan=plan,
+                iset=iset,
+            )
+
+        return PlanResponse(plan=plan.to_dict(), warning_ids=warning_ids)
 
     # --- CRISPR --------------------------------------------------------
 
@@ -217,7 +262,10 @@ def create_app() -> FastAPI:
     # --- Simulation ----------------------------------------------------
 
     @app.post("/simulate/edit", response_model=SimulateEditResponse)
-    async def simulate_edit(req: SimulateEditRequest) -> SimulateEditResponse:
+    async def simulate_edit(
+        req: SimulateEditRequest,
+        session: AsyncSession = Depends(get_session),
+    ) -> SimulateEditResponse:
         seq = _clean_dna(req.sequence)
         if not seq:
             raise HTTPException(status_code=422, detail="empty sequence")
@@ -240,10 +288,25 @@ def create_app() -> FastAPI:
         effect = predict_effect(seq, edit)
         tree = build_consequence_tree(req.gene_name, effect)
 
+        warning_ids: list[int] = []
+        if req.project_id is not None:
+            try:
+                await get_project(session, req.project_id)
+            except NotFoundError as e:
+                raise HTTPException(status_code=404, detail=str(e)) from e
+
+            warning_ids = await warnings_from_effect(
+                session,
+                project_id=req.project_id,
+                gene_name=req.gene_name,
+                effect=effect,
+            )
+
         return SimulateEditResponse(
             edited_sequence=edited,
             effect=effect.to_dict(),
             consequence_tree=tree.to_dict(),
+            warning_ids=warning_ids,
         )
 
     # --- Projects ------------------------------------------------------
@@ -324,5 +387,51 @@ def create_app() -> FastAPI:
         except NotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         return ExperimentResponse(experiment=e.to_dict())
+
+    # --- Warnings ------------------------------------------------------
+
+    @app.get(
+        "/projects/{project_id}/warnings",
+        response_model=WarningListResponse,
+    )
+    async def warnings_list(
+        project_id: int,
+        status: str | None = None,
+        session: AsyncSession = Depends(get_session),
+    ) -> WarningListResponse:
+        try:
+            await get_project(session, project_id)
+        except NotFoundError as e:
+            raise HTTPException(status_code=404, detail=str(e)) from e
+
+        status_enum: WarningStatus | None = None
+        if status:
+            try:
+                status_enum = WarningStatus(status)
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"status must be open|acknowledged, got {status!r}",
+                ) from e
+
+        items = await list_warnings(session, project_id, status=status_enum)
+        return WarningListResponse(warnings=[w.to_dict() for w in items])
+
+    @app.post(
+        "/warnings/{warning_id}/acknowledge",
+        response_model=WarningResponse,
+    )
+    async def warnings_acknowledge(
+        warning_id: int,
+        req: AcknowledgeRequest,
+        session: AsyncSession = Depends(get_session),
+    ) -> WarningResponse:
+        try:
+            w = await acknowledge_warning(
+                session, warning_id, by=req.by, note=req.note
+            )
+        except WarningError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+        return WarningResponse(warning=w.to_dict())
 
     return app

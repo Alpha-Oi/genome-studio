@@ -2,9 +2,13 @@ import { useEffect, useState } from "react";
 import { createProject, deleteProject, listProjects } from "@/lib/projectsApi";
 import type { Project } from "@/types/project";
 
-export function ProjectsPanel() {
+interface Props {
+  selectedId: number | null;
+  onSelect: (id: number | null) => void;
+}
+
+export function ProjectsPanel({ selectedId, onSelect }: Props) {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [newName, setNewName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,7 +35,7 @@ export function ProjectsPanel() {
       const p = await createProject(name);
       setNewName("");
       setProjects((prev) => [p, ...prev]);
-      setSelectedId(p.id);
+      onSelect(p.id);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -44,7 +48,7 @@ export function ProjectsPanel() {
     try {
       await deleteProject(id);
       setProjects((prev) => prev.filter((p) => p.id !== id));
-      if (selectedId === id) setSelectedId(null);
+      if (selectedId === id) onSelect(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     }
@@ -78,7 +82,7 @@ export function ProjectsPanel() {
             <li
               key={p.id}
               className={p.id === selectedId ? "selected" : ""}
-              onClick={() => setSelectedId(p.id)}
+              onClick={() => onSelect(p.id)}
             >
               <span className="pname">{p.name}</span>
               <button

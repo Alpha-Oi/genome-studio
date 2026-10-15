@@ -1,6 +1,3 @@
-// API клиент для backend Genome Studio.
-// В dev использует Vite proxy (/api -> 127.0.0.1:8000).
-
 import type { Plan } from "@/types/plan";
 
 const API_BASE = "/api";
@@ -12,18 +9,21 @@ export class ApiError extends Error {
   }
 }
 
-export async function fetchPlan(text: string): Promise<Plan> {
+export async function fetchPlan(text: string, projectId?: number): Promise<Plan> {
+  const body: { text: string; project_id?: number } = { text };
+  if (projectId !== undefined) body.project_id = projectId;
+
   const resp = await fetch(API_BASE + "/goal", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify(body),
   });
 
   if (!resp.ok) {
     let detail = "";
     try {
-      const body = await resp.json();
-      detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body);
+      const b = await resp.json();
+      detail = typeof b.detail === "string" ? b.detail : JSON.stringify(b);
     } catch {
       detail = await resp.text();
     }

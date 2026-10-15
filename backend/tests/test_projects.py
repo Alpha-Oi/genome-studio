@@ -10,11 +10,16 @@ from genome_studio.api.app import create_app
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    # isolate each test's DB
     monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
+    # reset global singletons so each test uses its own DB
+    from genome_studio.data import db as _db
+    _db._engine = None
+    _db._session_factory = None
     app = create_app()
     with TestClient(app) as c:
         yield c
+    _db._engine = None
+    _db._session_factory = None
 
 
 def test_projects_empty(client):
@@ -107,6 +112,5 @@ def test_delete_project_cascades_experiments(client):
     pid = client.post("/projects", json={"name": "P"}).json()["project"]["id"]
     client.post(f"/projects/{pid}/experiments", json={"kind": "plan", "title": "x"})
     client.delete(f"/projects/{pid}")
-    # project gone; list experiments on that project -> 404
     r = client.get(f"/projects/{pid}/experiments")
     assert r.status_code == 404

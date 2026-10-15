@@ -5,7 +5,11 @@ import type { SimulateEditResponse } from "@/types/simulation";
 
 const EXAMPLE_SEQ = "ATG" + "GCT".repeat(20) + "TAA";
 
-export function SimulationPanel() {
+interface Props {
+  projectId: number | null;
+}
+
+export function SimulationPanel({ projectId }: Props) {
   const [sequence, setSequence] = useState(EXAMPLE_SEQ);
   const [geneName, setGeneName] = useState("testGene");
   const [kind, setKind] = useState<"substitution" | "insertion" | "deletion">(
@@ -23,14 +27,17 @@ export function SimulationPanel() {
     setLoading(true);
     setError(null);
     try {
-      const r = await simulateEdit({
-        sequence: sequence.trim(),
-        gene_name: geneName,
-        kind,
-        position,
-        ref: kind === "insertion" ? "" : ref,
-        alt: kind === "deletion" ? "" : alt,
-      });
+      const r = await simulateEdit(
+        {
+          sequence: sequence.trim(),
+          gene_name: geneName,
+          kind,
+          position,
+          ref: kind === "insertion" ? "" : ref,
+          alt: kind === "deletion" ? "" : alt,
+          project_id: projectId ?? undefined,
+        },
+      );
       setResult(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");

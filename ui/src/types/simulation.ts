@@ -5,6 +5,7 @@ export interface SimulateEditRequest {
   position: number;
   ref: string;
   alt: string;
+  project_id?: number;
 }
 
 export interface EditEffect {
@@ -30,4 +31,5 @@ export interface SimulateEditResponse {
   edited_sequence: string;
   effect: EditEffect;
   consequence_tree: ConsequenceNode;
+  warning_ids: number[];
 }

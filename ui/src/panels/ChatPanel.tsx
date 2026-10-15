@@ -3,12 +3,16 @@ import { fetchPlan } from "@/lib/api";
 import { PlanCard } from "@/components/PlanCard";
 import type { Plan } from "@/types/plan";
 
+interface Props {
+  projectId: number | null;
+}
+
 interface PlanEntry {
   id: number;
   plan: Plan;
 }
 
-export function ChatPanel() {
+export function ChatPanel({ projectId }: Props) {
   const [text, setText] = useState("");
   const [plans, setPlans] = useState<PlanEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +25,7 @@ export function ChatPanel() {
     setLoading(true);
     setError(null);
     try {
-      const plan = await fetchPlan(trimmed);
+      const plan = await fetchPlan(trimmed, projectId ?? undefined);
       setPlans((prev) => [{ id: Date.now(), plan }, ...prev]);
       setText("");
     } catch (e) {
@@ -45,7 +49,11 @@ export function ChatPanel() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder='Например: "knockout gene lacZ in E. coli" (Ctrl+Enter — отправить)'
+          placeholder={
+            projectId !== null
+              ? 'Goal (warnings will attach to project): "knockout gene lacZ in E. coli"'
+              : 'Example: "knockout gene lacZ in E. coli" (Ctrl+Enter)'
+          }
           rows={3}
           disabled={loading}
         />
@@ -54,12 +62,12 @@ export function ChatPanel() {
         </button>
       </div>
 
-      {error && <div className="chat-error">Ошибка: {error}</div>}
+      {error && <div className="chat-error">Error: {error}</div>}
 
       <div className="chat-results">
         {plans.length === 0 && !error && (
           <div className="chat-empty">
-            Опиши цель — система предложит стратегию и план.
+            Describe a goal — the system will propose a strategy and a plan.
           </div>
         )}
         {plans.map((entry) => (

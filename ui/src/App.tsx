@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   BrowserPanel,
   ChatPanel,
@@ -12,28 +13,35 @@ import "./App.css";
 
 export function App() {
   const build = getBuildInfo();
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
   return (
     <div className="app">
       <header className="app-header">
         <h1>Genome Studio</h1>
         <span className="build-badge">{build.mode}</span>
+        {selectedProjectId !== null && (
+          <span className="project-badge">project #{selectedProjectId}</span>
+        )}
       </header>
 
       <main className="app-main">
         <aside className="app-sidebar">
-          <ProjectsPanel />
+          <ProjectsPanel
+            selectedId={selectedProjectId}
+            onSelect={setSelectedProjectId}
+          />
         </aside>
 
         <section className="app-center">
           <BrowserPanel />
           <CrisprPanel />
-          <SimulationPanel />
+          <SimulationPanel projectId={selectedProjectId} />
         </section>
 
         <aside className="app-right">
-          <ChatPanel />
-          <WarningsPanel />
+          <ChatPanel projectId={selectedProjectId} />
+          <WarningsPanel projectId={selectedProjectId} />
           <DevPanel />
         </aside>
       </main>
