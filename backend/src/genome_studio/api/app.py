@@ -2,11 +2,27 @@
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 from genome_studio import __version__
 from genome_studio.build_resolver import resolve_build
+from genome_studio.intent.parser import ParseError, parse_goal
+from genome_studio.knowledge.seed import build_default_kg
+from genome_studio.reasoning.planner import build_plan
 
+
+# --- Schemas -------------------------------------------------------------
+
+class GoalRequest(BaseModel):
+    text: str
+
+
+class PlanResponse(BaseModel):
+    plan: dict
+
+
+# --- App factory ---------------------------------------------------------
 
 def create_app() -> FastAPI:
     """Создаёт FastAPI-приложение."""
@@ -19,6 +35,8 @@ def create_app() -> FastAPI:
         redoc_url=None,
     )
 
+    kg = build_default_kg()
+
     @app.get("/health")
     async def health() -> dict[str, str]:
         return {"status": "ok", "version": __version__}
@@ -30,5 +48,20 @@ def create_app() -> FastAPI:
             "dev_override_available": info.dev_override_available,
             "isolated_environment": info.isolated_environment,
         }
+
+    @app.post("/goal", response_model=PlanResponse)
+    async def create_goal(req: GoalRequest) -> PlanResponse:
+        """Parse natural-language goal -> plan."""
+        try:
+            goal = parse_goal(req.text)
+        except ParseError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+
+        try:
+            plan = build_plan(goal, kg)
+        except ValueError as e:
+            raise HTTPException(status_code=500, detail=str(e)) from e
+
+        return PlanResponse(plan=plan.to_dict())
 
     return app
