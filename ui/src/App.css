@@ -7,18 +7,13 @@
 
 * { box-sizing: border-box; }
 
-body, html, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
+body, html, #root { margin: 0; padding: 0; height: 100%; }
 
 .app { display: flex; flex-direction: column; height: 100vh; }
 
 .app-header {
   display: flex; align-items: center; gap: 12px;
-  padding: 8px 16px;
-  background: #0f0f0f;
+  padding: 8px 16px; background: #0f0f0f;
   border-bottom: 1px solid #333;
 }
 
@@ -30,8 +25,7 @@ body, html, #root {
 }
 
 .app-main {
-  flex: 1;
-  display: grid;
+  flex: 1; display: grid;
   grid-template-columns: 240px 1fr 480px;
   overflow: hidden;
 }
@@ -132,7 +126,7 @@ body, html, #root {
   border-top: 1px solid #333; padding-top: 8px;
 }
 
-/* CRISPR / Simulation panels */
+/* CRISPR / Simulation */
 .crispr-panel { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .crispr-input { display: flex; flex-direction: column; gap: 6px; }
 .crispr-input label { font-size: 12px; color: #888; }
@@ -165,9 +159,7 @@ body, html, #root {
   text-transform: uppercase; letter-spacing: 0.5px; margin: 8px 0;
 }
 
-.guide-table {
-  width: 100%; border-collapse: collapse; font-size: 12px;
-}
+.guide-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .guide-table th {
   text-align: left; padding: 4px 6px; color: #888;
   border-bottom: 1px solid #333; font-weight: normal;
@@ -201,7 +193,6 @@ body, html, #root {
 }
 
 /* Simulation panel */
-
 .sim-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 100px 100px 100px;
@@ -210,19 +201,15 @@ body, html, #root {
   font-size: 12px;
   color: #888;
 }
-
 .sim-grid label { display: flex; flex-direction: column; gap: 4px; }
-
 .sim-grid input,
 .sim-grid select {
   padding: 6px 8px; font-family: inherit; font-size: 12px;
   background: #1a1a1a; color: #e6e6e6;
   border: 1px solid #444; border-radius: 4px;
 }
-
 .sim-grid input:focus,
 .sim-grid select:focus { outline: none; border-color: #4a8ac8; }
-
 .sim-grid input:disabled { opacity: 0.4; }
 
 .sim-result {
@@ -230,7 +217,6 @@ body, html, #root {
   padding: 12px; background: #232323;
   border: 1px solid #333; border-radius: 6px;
 }
-
 .sim-result h4 {
   font-size: 12px; color: #888;
   text-transform: uppercase; letter-spacing: 0.5px;
@@ -246,38 +232,66 @@ body, html, #root {
 }
 
 details summary {
-  cursor: pointer; color: #888; font-size: 12px;
-  padding: 4px 0;
+  cursor: pointer; color: #888; font-size: 12px; padding: 4px 0;
 }
 
 /* Consequence tree */
-
 .consequence-node {
   border-left: 1px solid #333;
   padding-left: 8px;
   margin: 4px 0;
 }
-
 .consequence-row {
   display: flex; gap: 8px; align-items: baseline;
   font-size: 12px; padding: 2px 0;
 }
-
 .ctype {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  text-transform: uppercase;
-  min-width: 80px;
-  text-align: center;
-  font-weight: bold;
+  font-size: 10px; padding: 1px 6px; border-radius: 3px;
+  text-transform: uppercase; min-width: 80px;
+  text-align: center; font-weight: bold;
 }
-
 .ctype-edit { background: #3a2a5a; color: #c8b8ee; }
 .ctype-transcript { background: #2a3a5a; color: #aac8ee; }
 .ctype-protein { background: #2a4a2a; color: #b8e0b8; }
 .ctype-pathway { background: #4a3a2a; color: #e0c8b0; }
 .ctype-phenotype { background: #4a2a3a; color: #e0b0c8; }
-
 .cdesc { flex: 1; color: #d8d8d8; }
 .cconf { font-size: 11px; color: #888; }
+
+/* Projects panel */
+.project-create {
+  display: flex; gap: 4px; margin-bottom: 10px;
+}
+.project-create input {
+  flex: 1; padding: 5px 8px; font-size: 12px;
+  background: #1a1a1a; color: #e6e6e6;
+  border: 1px solid #444; border-radius: 4px;
+}
+.project-create input:focus { outline: none; border-color: #4a8ac8; }
+.project-create button {
+  padding: 5px 12px; font-size: 14px; font-weight: bold;
+  background: #2a5a8a; color: #fff; border: none;
+  border-radius: 4px; cursor: pointer;
+}
+.project-create button:hover:not(:disabled) { background: #3a6a9a; }
+.project-create button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.project-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.project-list li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 8px; border-radius: 4px; cursor: pointer;
+  font-size: 12px; color: #d8d8d8;
+}
+.project-list li:hover { background: #2a2a2a; }
+.project-list li.selected { background: #2a3a5a; color: #aac8ee; }
+.project-list .pname {
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.project-list .pdelete {
+  background: transparent; border: none; color: #888;
+  font-size: 14px; cursor: pointer; padding: 0 4px;
+}
+.project-list .pdelete:hover { color: #ff8888; }
