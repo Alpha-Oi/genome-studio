@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from genome_studio import __version__
 from genome_studio.build_resolver import resolve_build
 from genome_studio.crispr.designer import design_guides
+from genome_studio.crispr.offtarget import find_offtargets, off_target_risk
 from genome_studio.intent.parser import ParseError, parse_goal
 from genome_studio.knowledge.seed import build_default_kg
 from genome_studio.reasoning.planner import build_plan
@@ -34,10 +35,21 @@ class CrisprResponse(BaseModel):
     guides: list[dict]
 
 
+class OffTargetRequest(BaseModel):
+    guide_spacer: str = Field(..., min_length=20, max_length=20)
+    reference: str = Field(..., min_length=23, max_length=1_000_000)
+    max_mismatches: int = Field(4, ge=0, le=10)
+    reference_label: str = Field("ref", max_length=64)
+
+
+class OffTargetResponse(BaseModel):
+    hits: list[dict]
+    summary: dict
+
+
 # --- Helpers -------------------------------------------------------------
 
 def _clean_dna(seq: str) -> str:
-    """Uppercase, strip non-ACGTN."""
     seq = seq.upper()
     return "".join(b for b in seq if b in "ACGTN")
 
@@ -106,5 +118,27 @@ def create_app() -> FastAPI:
                 detail="No guide RNAs found with given criteria",
             )
         return CrisprResponse(guides=[g.to_dict() for g in guides])
+
+    @app.post("/crispr/offtarget", response_model=OffTargetResponse)
+    async def crispr_offtarget(req: OffTargetRequest) -> OffTargetResponse:
+        guide = _clean_dna(req.guide_spacer)
+        ref = _clean_dna(req.reference)
+        if len(guide) != 20:
+            raise HTTPException(status_code=422, detail="guide_spacer must be 20 nt")
+        if len(ref) < 23:
+            raise HTTPException(status_code=422, detail="reference too short")
+
+        hits = find_offtargets(
+            guide_spacer=guide,
+            reference=ref,
+            max_mismatches=req.max_mismatches,
+            reference_label=req.reference_label,
+        )
+        summary = off_target_risk(hits)
+
+        return OffTargetResponse(
+            hits=[h.to_dict() for h in hits],
+            summary=summary,
+        )
 
     return app

@@ -260,7 +260,20 @@ body, html, #root {
 .crispr-input button:hover:not(:disabled) { background: #3a6a9a; }
 .crispr-input button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.guide-list h3 {
+.guide-selector { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.guide-selector label { font-size: 12px; color: #888; }
+.guide-selector select {
+  padding: 6px 8px;
+  background: #1a1a1a;
+  color: #e6e6e6;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+
+.guide-list h3,
+.offtarget-list h3 {
   font-size: 12px;
   color: #888;
   text-transform: uppercase;
@@ -296,6 +309,10 @@ body, html, #root {
   color: #a8d8a8;
 }
 
+.guide-table tr.row-perfect {
+  background: rgba(136, 216, 136, 0.08);
+}
+
 .score-good { color: #88d888; font-weight: bold; }
 .score-mid { color: #e8c888; }
 .score-bad { color: #e88888; }
@@ -306,4 +323,22 @@ body, html, #root {
   margin: 8px 0 0;
   font-size: 11px;
   color: #ffb0b0;
+}
+
+.offtarget-summary {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #888;
+  margin: 6px 0 10px;
+}
+
+.offtarget-summary b { color: #e6e6e6; margin-left: 4px; }
+
+.offtarget-empty {
+  font-size: 12px;
+  color: #666;
+  padding: 8px 0;
+  margin: 0;
 }
