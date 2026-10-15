@@ -5,6 +5,7 @@ import {
   CrisprPanel,
   DevPanel,
   ProjectsPanel,
+  SequencingPanel,
   SimulationPanel,
   WarningsPanel,
 } from "@/panels";
@@ -45,6 +46,7 @@ export function App() {
             projectId={selectedProjectId}
             onSimulated={bumpWarnings}
           />
+          <SequencingPanel projectId={selectedProjectId} />
         </section>
 
         <aside className="app-right">
