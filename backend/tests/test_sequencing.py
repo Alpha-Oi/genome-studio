@@ -136,6 +136,7 @@ def _seqs():
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
+    monkeypatch.setenv("GS_SKIP_MIGRATIONS", "1")
     from genome_studio.data import db as _db
 
     _db._engine = None

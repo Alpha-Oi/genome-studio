@@ -74,13 +74,41 @@ def get_session_factory() -> async_sessionmaker[AsyncSession]:
 
 
 async def init_db() -> None:
-    """Create tables if not exist."""
-    # Import models so they register on Base.metadata
-    from genome_studio.data import models  # noqa: F401
+    """Initialize the database.
 
-    engine = get_engine()
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    Two modes:
+    1. GS_SKIP_MIGRATIONS=1 (tests): create_all for speed and isolation.
+    2. Default (prod/dev): alembic upgrade head for proper versioned migrations.
+    """
+    import os
+
+    # Register all models on Base.metadata (needed for create_all fallback)
+    from genome_studio.data import models as _data_models  # noqa: F401
+    from genome_studio.warnings import models as _warning_models  # noqa: F401
+
+    if os.environ.get("GS_SKIP_MIGRATIONS") == "1":
+        # Fast path for tests: create_all, no alembic
+        engine = get_engine()
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        return
+
+    # Production path: run alembic migrations
+    import asyncio
+    from alembic import command
+    from alembic.config import Config
+
+    ini_path = Path(__file__).parent.parent.parent.parent.parent / "alembic.ini"
+    if not ini_path.is_file():
+        # Fallback: if alembic.ini not found (e.g. packaged), use create_all
+        engine = get_engine()
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        return
+
+    cfg = Config(str(ini_path))
+    # alembic command.upgrade is sync, run in thread
+    await asyncio.to_thread(command.upgrade, cfg, "head")
 
 
 async def dispose_engine() -> None:
