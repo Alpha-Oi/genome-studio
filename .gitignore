@@ -7,11 +7,9 @@ venv/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-uv.lock
 
 # Rust
 target/
-Cargo.lock
 *.so
 *.pyd
 
