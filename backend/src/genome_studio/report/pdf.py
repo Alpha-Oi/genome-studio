@@ -139,7 +139,7 @@ def _kv_table(rows: list[tuple[str, str]], styles: dict[str, ParagraphStyle]) ->
     return t
 
 
-def _two_col_table(header: list[str], rows: list[list[str]], styles) -> Table:
+def _two_col_table(header: list[str], rows: list[list[str]], styles: dict[str, Any]) -> Table:
     data = [[Paragraph(f"<b>{_safe(h)}</b>", styles["body"]) for h in header]]
     for row in rows:
         data.append([Paragraph(_safe(c), styles["body"]) for c in row])
@@ -158,7 +158,7 @@ def _section_title(text: str, styles: dict[str, ParagraphStyle]) -> Paragraph:
     return Paragraph(_safe(text), styles["h2"])
 
 
-def _render_project_header(project: dict, styles) -> list:
+def _render_project_header(project: dict, styles: dict[str, Any]) -> list:
     out: list = []
     out.append(Paragraph("Genome Studio — Project Report", styles["title"]))
     out.append(Spacer(1, 0.3 * cm))
@@ -179,7 +179,7 @@ def _render_project_header(project: dict, styles) -> list:
     return out
 
 
-def _render_warnings(warnings: list[dict], styles) -> list:
+def _render_warnings(warnings: list[dict], styles: dict[str, Any]) -> list:
     out: list = []
     out.append(_section_title("Warnings", styles))
     if not warnings:
@@ -212,9 +212,9 @@ def _render_warnings(warnings: list[dict], styles) -> list:
     return out
 
 
-def _render_plan(exp: dict, styles) -> list:
+def _render_plan(exp: dict, styles: dict[str, Any]) -> list:
     payload = exp.get("payload") or {}
-    plan = payload.get("plan") if "plan" in payload else payload
+    plan = (payload.get("plan") if "plan" in payload else payload) or {}
     goal = plan.get("goal", {})
     iv = plan.get("intervention", {})
     steps = plan.get("steps", [])
@@ -244,7 +244,7 @@ def _render_plan(exp: dict, styles) -> list:
     return out
 
 
-def _render_guides(exp: dict, styles) -> list:
+def _render_guides(exp: dict, styles: dict[str, Any]) -> list:
     payload = exp.get("payload") or {}
     guides = payload.get("guides", []) if isinstance(payload, dict) else []
     out: list = [_section_title("CRISPR guides — " + exp.get("title", "?"), styles)]
@@ -263,7 +263,7 @@ def _render_guides(exp: dict, styles) -> list:
     return out
 
 
-def _render_offtarget(exp: dict, styles) -> list:
+def _render_offtarget(exp: dict, styles: dict[str, Any]) -> list:
     payload = exp.get("payload") or {}
     summary = payload.get("summary", {})
     hits = payload.get("hits", [])
@@ -292,7 +292,7 @@ def _render_offtarget(exp: dict, styles) -> list:
     return out
 
 
-def _render_simulation(exp: dict, styles) -> list:
+def _render_simulation(exp: dict, styles: dict[str, Any]) -> list:
     payload = exp.get("payload") or {}
     effect = payload.get("effect", {})
     tree = payload.get("consequence_tree", {})
@@ -308,7 +308,7 @@ def _render_simulation(exp: dict, styles) -> list:
     return out
 
 
-def _tree_to_text(node: dict, out: list, styles, depth: int) -> None:
+def _tree_to_text(node: dict, out: list, styles: dict[str, Any], depth: int) -> None:
     if not isinstance(node, dict):
         return
     indent = "  " * depth
@@ -320,7 +320,7 @@ def _tree_to_text(node: dict, out: list, styles, depth: int) -> None:
         _tree_to_text(child, out, styles, depth + 1)
 
 
-def _render_sequencing(exp: dict, styles) -> list:
+def _render_sequencing(exp: dict, styles: dict[str, Any]) -> list:
     payload = exp.get("payload") or {}
     sanger = payload.get("sanger") or {}
     ngs = payload.get("ngs") or {}
@@ -337,7 +337,7 @@ def _render_sequencing(exp: dict, styles) -> list:
     return out
 
 
-def _render_experiments(experiments: list[dict], styles) -> list:
+def _render_experiments(experiments: list[dict], styles: dict[str, Any]) -> list:
     out: list = []
     latest: dict[str, dict] = {}
     for e in experiments:

@@ -48,6 +48,7 @@ dev = [
     "mypy>=1.13",
     "ruff>=0.8",
     "httpx>=0.28",
+    "types-reportlab>=5.0",
 ]
 
 [project.scripts]

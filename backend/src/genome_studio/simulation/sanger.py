@@ -45,7 +45,7 @@ class SangerPosition:
             reverse=True,
         )
         top, second = vals[0][1], vals[1][1]
-        return top > 0 and second / top > 0.3
+        return bool(top > 0 and second / top > 0.3)
 
 
 class SangerError(ValueError):

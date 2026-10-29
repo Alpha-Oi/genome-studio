@@ -85,7 +85,7 @@ Frontend (терминал 2):
 | Core | Rust 1.99, PyO3, ed25519-dalek |
 | PDF | reportlab 4.2, DejaVu Sans |
 | Инфра | Docker, GitHub Actions |
-| Тесты | pytest, ruff, mypy, tsc |
+| Тесты | pytest (157), ruff, mypy (essential checks), tsc |
 
 ## Документация
 

@@ -89,7 +89,7 @@ def _extract_gene(text: str) -> str | None:
     # Явная форма "gene X" или "ген X"
     m = re.search(r"(?:gene|ген)\s+([A-Za-z][A-Za-z0-9]{1,9})", text, re.IGNORECASE)
     if m:
-        return m.group(1)
+        return str(m.group(1))
 
     # Иначе - ищем uppercase-подобное слово
     candidates = _GENE_RE.findall(text)
@@ -97,7 +97,7 @@ def _extract_gene(text: str) -> str | None:
     stops = {"DNA", "RNA", "PCR", "CRISPR", "CHO", "KO", "KI"}
     candidates = [c for c in candidates if c.upper() not in stops]
     if candidates:
-        return candidates[0]
+        return str(candidates[0])
     return None
 
 

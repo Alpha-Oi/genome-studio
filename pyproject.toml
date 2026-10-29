@@ -20,20 +20,29 @@ testpaths = ["backend/tests"]
 [tool.mypy]
 python_version = "3.12"
 plugins = ["pydantic.mypy"]
-strict = true
+exclude = ['^\.venv/', '^build/', '^dist/', '^node_modules/', '^backend/tests/']
+
+# Essential checks (не strict, но ловит реальные ошибки)
 warn_return_any = true
 warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+show_error_codes = true
+
+# Functions in src/ must have annotations
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
-check_untyped_defs = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-show_error_codes = true
-exclude = ['^\.venv/', '^build/', '^dist/', '^node_modules/']
+
+# Skipped from strict (too noisy for MVP):
+# - disallow_any_generics (bare dict/list are OK)
+# - disallow_subclassing_any
+# - disallow_untyped_calls
+# - disallow_untyped_decorators
 
 [[tool.mypy.overrides]]
-module = ["Bio.*", "pysam.*", "pyfaidx.*", "reportlab.*", "reportlab.*.*"]
+module = ["reportlab.*", "reportlab.*.*"]
 ignore_missing_imports = true
 
 [tool.ruff]

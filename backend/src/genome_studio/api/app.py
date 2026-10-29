@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from typing import Any
+
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, Response
@@ -174,7 +177,7 @@ def _clean_dna(seq: str) -> str:
     return "".join(b for b in seq if b in "ACGTN")
 
 
-def _parse_edit(req) -> Edit:
+def _parse_edit(req: Any) -> Edit:
     try:
         kind = EditKind(req.kind)
     except ValueError as e:
@@ -194,7 +197,7 @@ def create_app() -> FastAPI:
     info = resolve_build()
 
     @asynccontextmanager
-    async def lifespan(app: FastAPI):
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await init_db()
         yield
         await dispose_engine()
