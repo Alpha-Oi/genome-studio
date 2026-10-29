@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from genome_studio.reasoning.planner import Plan
-from genome_studio.simulation.effects import EditEffect
 from genome_studio.simulation.consequence import ConsequenceNode
+from genome_studio.simulation.effects import EditEffect
 
 
 def build_report(
@@ -23,7 +23,7 @@ def build_report(
     Any of plan/effect/tree/warnings may be omitted.
     """
     report: dict = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "generator": "Genome Studio",
         "title": title,
         "project_name": project_name,

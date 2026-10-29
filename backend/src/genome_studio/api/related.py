@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from genome_studio.data import get_session
 from genome_studio.data.models import Experiment, Project
 
-
 router = APIRouter(tags=["related"])
 
 
@@ -31,9 +30,7 @@ async def find_related(
     docs/15-multiuser-architecture.md.
     """
     stmt = (
-        select(Experiment)
-        .where(Experiment.kind == "plan")
-        .order_by(Experiment.created_at.desc())
+        select(Experiment).where(Experiment.kind == "plan").order_by(Experiment.created_at.desc())
     )
     result = await session.execute(stmt)
     experiments = result.scalars().all()
@@ -54,16 +51,18 @@ async def find_related(
             and goal.get("intent") == intent
         ):
             intervention = payload.get("intervention") or {}
-            matches.append({
-                "experiment_id": exp.id,
-                "project_id": exp.project_id,
-                "title": exp.title,
-                "created_at": exp.created_at.isoformat(),
-                "intervention_kind": intervention.get("kind"),
-                "predicted_effect": intervention.get("predicted_effect"),
-                "off_target_risk": intervention.get("off_target_risk"),
-                "essentiality_risk": intervention.get("essentiality_risk"),
-            })
+            matches.append(
+                {
+                    "experiment_id": exp.id,
+                    "project_id": exp.project_id,
+                    "title": exp.title,
+                    "created_at": exp.created_at.isoformat(),
+                    "intervention_kind": intervention.get("kind"),
+                    "predicted_effect": intervention.get("predicted_effect"),
+                    "off_target_risk": intervention.get("off_target_risk"),
+                    "essentiality_risk": intervention.get("essentiality_risk"),
+                }
+            )
             if len(matches) >= limit:
                 break
 

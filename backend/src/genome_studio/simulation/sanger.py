@@ -16,7 +16,7 @@ from genome_studio.simulation.mixture import Allele
 class SangerPosition:
     """Peak heights at one position."""
 
-    position: int        # 0-based on + strand
+    position: int  # 0-based on + strand
     A: float
     T: float
     G: float
@@ -85,11 +85,13 @@ def simulate_sanger(
             base = a.sequence[pos].upper()
             if base in peaks:
                 peaks[base] += a.fraction
-        positions.append(SangerPosition(
-            position=pos,
-            A=peaks["A"],
-            T=peaks["T"],
-            G=peaks["G"],
-            C=peaks["C"],
-        ))
+        positions.append(
+            SangerPosition(
+                position=pos,
+                A=peaks["A"],
+                T=peaks["T"],
+                G=peaks["G"],
+                C=peaks["C"],
+            )
+        )
     return positions

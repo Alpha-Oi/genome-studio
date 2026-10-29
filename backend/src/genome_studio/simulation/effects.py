@@ -14,7 +14,7 @@ class EffectType(str, Enum):
     OUTSIDE_ORF = "outside_orf"
     SILENT = "silent"
     MISSENSE = "missense"
-    NONSENSE = "nonsense"           # premature stop codon
+    NONSENSE = "nonsense"  # premature stop codon
     FRAMESHIFT = "frameshift"
     IN_FRAME_INDEL = "in_frame_indel"
     UNKNOWN = "unknown"
@@ -28,7 +28,7 @@ class EditEffect:
     ref_protein: str
     alt_protein: str
     description: str
-    severity: float             # 0..1
+    severity: float  # 0..1
     evidence: tuple[str, ...] = ()
 
     def to_dict(self) -> dict:
@@ -77,7 +77,6 @@ def predict_effect(ref_seq: str, edit: Edit) -> EditEffect:
 
     # Edit position relative to ORF?
     edit_start = edit.position
-    edit_end = edit.position + len(edit.ref)
     in_orf = main_ref.start <= edit_start < main_ref.end
 
     if not in_orf:

@@ -21,8 +21,8 @@ class Edit:
 
     kind: EditKind
     position: int
-    ref: str           # reference bases affected (for validation)
-    alt: str           # replacement bases (empty for pure deletion)
+    ref: str  # reference bases affected (for validation)
+    alt: str  # replacement bases (empty for pure deletion)
 
     def to_dict(self) -> dict:
         return {

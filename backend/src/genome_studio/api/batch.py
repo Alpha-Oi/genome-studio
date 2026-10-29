@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from genome_studio.crispr.designer import design_guides
-
 
 router = APIRouter(tags=["batch"])
 
@@ -41,18 +40,24 @@ async def batch_design(req: BatchDesignRequest) -> dict:
     for item in req.sequences:
         seq = _clean_dna(item.sequence)
         if len(seq) < 23:
-            results.append(BatchDesignResult(
-                name=item.name, length=len(seq), guides=[],
-                error="sequence too short (" + str(len(seq)) + " nt)",
-            ))
+            results.append(
+                BatchDesignResult(
+                    name=item.name,
+                    length=len(seq),
+                    guides=[],
+                    error="sequence too short (" + str(len(seq)) + " nt)",
+                )
+            )
             continue
 
         guides = design_guides(seq, top_n=req.top_n, min_score=req.min_score)
-        results.append(BatchDesignResult(
-            name=item.name,
-            length=len(seq),
-            guides=[g.to_dict() for g in guides],
-            error=None if guides else "no guides found",
-        ))
+        results.append(
+            BatchDesignResult(
+                name=item.name,
+                length=len(seq),
+                guides=[g.to_dict() for g in guides],
+                error=None if guides else "no guides found",
+            )
+        )
 
     return {"results": [r.model_dump() for r in results]}

@@ -18,19 +18,19 @@ def hamming(a: str, b: str) -> int:
     """Hamming distance. Assumes equal length."""
     if len(a) != len(b):
         raise ValueError("lengths must match")
-    return sum(1 for x, y in zip(a, b) if x != y)
+    return sum(1 for x, y in zip(a, b, strict=False) if x != y)
 
 
 @dataclass(frozen=True)
 class OffTargetHit:
     """One off-target site."""
 
-    position: int           # 0-based position of PAM start
-    strand: str             # "+" or "-"
+    position: int  # 0-based position of PAM start
+    strand: str  # "+" or "-"
     mismatches: int
-    spacer: str             # actual sequence found
-    pam: str                # actual PAM
-    locus_label: str        # e.g., "chr1:12345" or "ref:pos"
+    spacer: str  # actual sequence found
+    pam: str  # actual PAM
+    locus_label: str  # e.g., "chr1:12345" or "ref:pos"
 
     def to_dict(self) -> dict:
         return {
@@ -64,15 +64,15 @@ def find_offtargets(
     """
     guide = guide_spacer.upper()
     ref = reference.upper()
-    L = len(guide)
+    seq_len = len(guide)
     pam_len = 1 + len(pam_suffix)
-    total = L + pam_len
+    total = seq_len + pam_len
     hits: list[OffTargetHit] = []
 
     # + strand
     for i in range(0, len(ref) - total + 1):
-        cand = ref[i : i + L]
-        pam_start = i + L
+        cand = ref[i : i + seq_len]
+        pam_start = i + seq_len
         n_base = ref[pam_start]
         tail = ref[pam_start + 1 : pam_start + 1 + len(pam_suffix)]
         if n_base not in "ACGT" or tail != pam_suffix:
@@ -82,20 +82,22 @@ def find_offtargets(
         except ValueError:
             continue
         if mm <= max_mismatches:
-            hits.append(OffTargetHit(
-                position=pam_start,
-                strand="+",
-                mismatches=mm,
-                spacer=cand,
-                pam=n_base + tail,
-                locus_label=f"{reference_label}:{pam_start}",
-            ))
+            hits.append(
+                OffTargetHit(
+                    position=pam_start,
+                    strand="+",
+                    mismatches=mm,
+                    spacer=cand,
+                    pam=n_base + tail,
+                    locus_label=f"{reference_label}:{pam_start}",
+                )
+            )
 
     # - strand
     rc_ref = _revcomp(ref)
     for i in range(0, len(rc_ref) - total + 1):
-        cand = rc_ref[i : i + L]
-        pam_start = i + L
+        cand = rc_ref[i : i + seq_len]
+        pam_start = i + seq_len
         n_base = rc_ref[pam_start]
         tail = rc_ref[pam_start + 1 : pam_start + 1 + len(pam_suffix)]
         if n_base not in "ACGT" or tail != pam_suffix:
@@ -106,14 +108,16 @@ def find_offtargets(
             continue
         if mm <= max_mismatches:
             orig_pos = len(ref) - 1 - pam_start
-            hits.append(OffTargetHit(
-                position=orig_pos,
-                strand="-",
-                mismatches=mm,
-                spacer=cand,
-                pam=n_base + tail,
-                locus_label=f"{reference_label}:{orig_pos}(-)",
-            ))
+            hits.append(
+                OffTargetHit(
+                    position=orig_pos,
+                    strand="-",
+                    mismatches=mm,
+                    spacer=cand,
+                    pam=n_base + tail,
+                    locus_label=f"{reference_label}:{orig_pos}(-)",
+                )
+            )
 
     hits.sort(key=lambda h: (h.mismatches, h.position))
     return hits

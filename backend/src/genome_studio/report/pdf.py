@@ -6,7 +6,7 @@ for full Unicode (Cyrillic, etc.); falls back to Helvetica otherwise.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -27,7 +27,6 @@ from reportlab.platypus import (
 )
 
 from genome_studio import __version__
-
 
 _FONTS_DIR = Path(__file__).parent / "fonts"
 
@@ -125,17 +124,20 @@ def _styles() -> dict[str, ParagraphStyle]:
 
 def _kv_table(rows: list[tuple[str, str]], styles: dict[str, ParagraphStyle]) -> Table:
     data = [
-        [Paragraph(f"<b>{_safe(k)}</b>", styles["body"]),
-         Paragraph(_safe(v), styles["body"])]
+        [Paragraph(f"<b>{_safe(k)}</b>", styles["body"]), Paragraph(_safe(v), styles["body"])]
         for k, v in rows
     ]
     t = Table(data, colWidths=[4 * cm, None])
-    t.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-        ("TOPPADDING", (0, 0), (-1, -1), 4),
-        ("LINEBELOW", (0, 0), (-1, -2), 0.25, colors.lightgrey),
-    ]))
+    t.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("LINEBELOW", (0, 0), (-1, -2), 0.25, colors.lightgrey),
+            ]
+        )
+    )
     return t
 
 
@@ -144,13 +146,17 @@ def _two_col_table(header: list[str], rows: list[list[str]], styles: dict[str, A
     for row in rows:
         data.append([Paragraph(_safe(c), styles["body"]) for c in row])
     t = Table(data, repeatRows=1)
-    t.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e8e8e8")),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-        ("TOPPADDING", (0, 0), (-1, -1), 4),
-        ("GRID", (0, 0), (-1, -1), 0.25, colors.lightgrey),
-    ]))
+    t.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e8e8e8")),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("GRID", (0, 0), (-1, -1), 0.25, colors.lightgrey),
+            ]
+        )
+    )
     return t
 
 
@@ -162,20 +168,29 @@ def _render_project_header(project: dict, styles: dict[str, Any]) -> list:
     out: list = []
     out.append(Paragraph("Genome Studio — Project Report", styles["title"]))
     out.append(Spacer(1, 0.3 * cm))
-    out.append(_kv_table([
-        ("Project", project.get("name", "?")),
-        ("Organism", project.get("organism") or "—"),
-        ("Description", project.get("description") or "—"),
-        ("Project ID", str(project.get("id", "?"))),
-        ("Created", project.get("created_at", "?")),
-        ("Updated", project.get("updated_at", "?")),
-    ], styles))
+    out.append(
+        _kv_table(
+            [
+                ("Project", project.get("name", "?")),
+                ("Organism", project.get("organism") or "—"),
+                ("Description", project.get("description") or "—"),
+                ("Project ID", str(project.get("id", "?"))),
+                ("Created", project.get("created_at", "?")),
+                ("Updated", project.get("updated_at", "?")),
+            ],
+            styles,
+        )
+    )
     out.append(Spacer(1, 0.2 * cm))
-    out.append(Paragraph(
-        "Generated " + datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-        + " — Genome Studio v" + __version__,
-        styles["small"],
-    ))
+    out.append(
+        Paragraph(
+            "Generated "
+            + datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+            + " — Genome Studio v"
+            + __version__,
+            styles["small"],
+        )
+    )
     return out
 
 
@@ -189,11 +204,12 @@ def _render_warnings(warnings: list[dict], styles: dict[str, Any]) -> list:
     open_w = [w for w in warnings if w.get("status") == "open"]
     ack_w = [w for w in warnings if w.get("status") == "acknowledged"]
 
-    out.append(Paragraph(
-        "Open: <b>" + str(len(open_w)) + "</b>, "
-        "Acknowledged: <b>" + str(len(ack_w)) + "</b>",
-        styles["body"],
-    ))
+    out.append(
+        Paragraph(
+            "Open: <b>" + str(len(open_w)) + "</b>, Acknowledged: <b>" + str(len(ack_w)) + "</b>",
+            styles["body"],
+        )
+    )
     out.append(Spacer(1, 0.2 * cm))
 
     for w in warnings:
@@ -203,11 +219,15 @@ def _render_warnings(warnings: list[dict], styles: dict[str, Any]) -> list:
         out.append(Paragraph(_safe(w.get("message", "")), styles["body"]))
         status = w.get("status", "?")
         if status == "acknowledged":
-            out.append(Paragraph(
-                "✓ Acknowledged by " + _safe(w.get("acknowledged_by", "?"))
-                + ": " + _safe(w.get("acknowledgment_note", "")),
-                styles["small"],
-            ))
+            out.append(
+                Paragraph(
+                    "✓ Acknowledged by "
+                    + _safe(w.get("acknowledged_by", "?"))
+                    + ": "
+                    + _safe(w.get("acknowledgment_note", "")),
+                    styles["small"],
+                )
+            )
         out.append(Spacer(1, 0.2 * cm))
     return out
 
@@ -220,16 +240,21 @@ def _render_plan(exp: dict, styles: dict[str, Any]) -> list:
     steps = plan.get("steps", [])
 
     out: list = [_section_title("Plan — " + exp.get("title", "?"), styles)]
-    out.append(_kv_table([
-        ("Intent", goal.get("intent", "?")),
-        ("Target gene", goal.get("target", {}).get("gene", "?")),
-        ("Organism", goal.get("target", {}).get("organism", "?")),
-        ("Intervention", iv.get("kind", "?")),
-        ("Predicted effect", f"{iv.get('predicted_effect', 0):.2f}"),
-        ("Off-target risk", f"{iv.get('off_target_risk', 0):.2f}"),
-        ("Essentiality risk", f"{iv.get('essentiality_risk', 0):.2f}"),
-        ("Complexity", str(iv.get("complexity", "?"))),
-    ], styles))
+    out.append(
+        _kv_table(
+            [
+                ("Intent", goal.get("intent", "?")),
+                ("Target gene", goal.get("target", {}).get("gene", "?")),
+                ("Organism", goal.get("target", {}).get("organism", "?")),
+                ("Intervention", iv.get("kind", "?")),
+                ("Predicted effect", f"{iv.get('predicted_effect', 0):.2f}"),
+                ("Off-target risk", f"{iv.get('off_target_risk', 0):.2f}"),
+                ("Essentiality risk", f"{iv.get('essentiality_risk', 0):.2f}"),
+                ("Complexity", str(iv.get("complexity", "?"))),
+            ],
+            styles,
+        )
+    )
     out.append(Spacer(1, 0.2 * cm))
 
     if iv.get("rationale"):
@@ -238,8 +263,10 @@ def _render_plan(exp: dict, styles: dict[str, Any]) -> list:
 
     if steps:
         out.append(Paragraph("<b>Steps:</b>", styles["body"]))
-        rows = [[str(s.get("order", "?")), s.get("action", "?"), s.get("description", "?")]
-                for s in steps]
+        rows = [
+            [str(s.get("order", "?")), s.get("action", "?"), s.get("description", "?")]
+            for s in steps
+        ]
         out.append(_two_col_table(["#", "Action", "Description"], rows, styles))
     return out
 
@@ -253,13 +280,23 @@ def _render_guides(exp: dict, styles: dict[str, Any]) -> list:
         return out
 
     rows = [
-        [str(i + 1), g.get("spacer", "?"), g.get("pam", "?"),
-         g.get("strand", "?"), f"{g.get('gc_content', 0):.2f}", f"{g.get('score', 0):.2f}"]
+        [
+            str(i + 1),
+            g.get("spacer", "?"),
+            g.get("pam", "?"),
+            g.get("strand", "?"),
+            f"{g.get('gc_content', 0):.2f}",
+            f"{g.get('score', 0):.2f}",
+        ]
         for i, g in enumerate(guides)
     ]
-    out.append(_two_col_table(
-        ["#", "Spacer", "PAM", "Strand", "GC", "Score"], rows, styles,
-    ))
+    out.append(
+        _two_col_table(
+            ["#", "Spacer", "PAM", "Strand", "GC", "Score"],
+            rows,
+            styles,
+        )
+    )
     return out
 
 
@@ -268,27 +305,44 @@ def _render_offtarget(exp: dict, styles: dict[str, Any]) -> list:
     summary = payload.get("summary", {})
     hits = payload.get("hits", [])
     out: list = [_section_title("Off-target — " + exp.get("title", "?"), styles)]
-    out.append(_kv_table([
-        ("Total hits", str(summary.get("total", 0))),
-        ("Perfect (0 mm)", str(summary.get("perfect", 0))),
-        ("Near (1-2 mm)", str(summary.get("near", 0))),
-        ("Distant (>=3 mm)", str(summary.get("distant", 0))),
-        ("Risk score", f"{summary.get('risk', 0):.2f}"),
-    ], styles))
+    out.append(
+        _kv_table(
+            [
+                ("Total hits", str(summary.get("total", 0))),
+                ("Perfect (0 mm)", str(summary.get("perfect", 0))),
+                ("Near (1-2 mm)", str(summary.get("near", 0))),
+                ("Distant (>=3 mm)", str(summary.get("distant", 0))),
+                ("Risk score", f"{summary.get('risk', 0):.2f}"),
+            ],
+            styles,
+        )
+    )
     if hits:
         out.append(Spacer(1, 0.2 * cm))
         rows = [
-            [str(i + 1), h.get("locus_label", "?"), h.get("strand", "?"),
-             str(h.get("mismatches", 0)), h.get("spacer", "?")]
+            [
+                str(i + 1),
+                h.get("locus_label", "?"),
+                h.get("strand", "?"),
+                str(h.get("mismatches", 0)),
+                h.get("spacer", "?"),
+            ]
             for i, h in enumerate(hits[:20])
         ]
-        out.append(_two_col_table(
-            ["#", "Locus", "Strand", "MM", "Spacer"], rows, styles,
-        ))
+        out.append(
+            _two_col_table(
+                ["#", "Locus", "Strand", "MM", "Spacer"],
+                rows,
+                styles,
+            )
+        )
         if len(hits) > 20:
-            out.append(Paragraph(
-                "Showing first 20 of " + str(len(hits)) + " hits.", styles["small"],
-            ))
+            out.append(
+                Paragraph(
+                    "Showing first 20 of " + str(len(hits)) + " hits.",
+                    styles["small"],
+                )
+            )
     return out
 
 
@@ -297,11 +351,16 @@ def _render_simulation(exp: dict, styles: dict[str, Any]) -> list:
     effect = payload.get("effect", {})
     tree = payload.get("consequence_tree", {})
     out: list = [_section_title("Simulation — " + exp.get("title", "?"), styles)]
-    out.append(_kv_table([
-        ("Effect type", effect.get("effect_type", "?")),
-        ("Severity", f"{effect.get('severity', 0):.2f}"),
-        ("Description", effect.get("description", "?")),
-    ], styles))
+    out.append(
+        _kv_table(
+            [
+                ("Effect type", effect.get("effect_type", "?")),
+                ("Severity", f"{effect.get('severity', 0):.2f}"),
+                ("Description", effect.get("description", "?")),
+            ],
+            styles,
+        )
+    )
     out.append(Spacer(1, 0.2 * cm))
     out.append(Paragraph("<b>Consequence tree:</b>", styles["body"]))
     _tree_to_text(tree, out, styles, depth=0)
@@ -333,7 +392,9 @@ def _render_sequencing(exp: dict, styles: dict[str, Any]) -> list:
 
     if ngs:
         out.append(Spacer(1, 0.2 * cm))
-        out.append(Paragraph("<b>NGS:</b> total reads " + str(ngs.get("total_reads", 0)), styles["body"]))
+        out.append(
+            Paragraph("<b>NGS:</b> total reads " + str(ngs.get("total_reads", 0)), styles["body"])
+        )
     return out
 
 
@@ -392,10 +453,15 @@ def build_project_pdf(
     story.append(Spacer(1, 0.4 * cm))
 
     story.append(_section_title("Summary", styles))
-    story.append(_kv_table([
-        ("Experiments", str(len(experiments))),
-        ("Warnings", str(len(warnings))),
-    ], styles))
+    story.append(
+        _kv_table(
+            [
+                ("Experiments", str(len(experiments))),
+                ("Warnings", str(len(warnings))),
+            ],
+            styles,
+        )
+    )
     story.append(Spacer(1, 0.3 * cm))
 
     story.extend(_render_warnings(warnings, styles))

@@ -48,9 +48,7 @@ def validate_mixture(alleles: list[Allele]) -> None:
 
     lengths = {len(a.sequence) for a in alleles}
     if len(lengths) > 1:
-        raise MixtureError(
-            f"all alleles must have same length, got lengths {sorted(lengths)}"
-        )
+        raise MixtureError(f"all alleles must have same length, got lengths {sorted(lengths)}")
 
 
 def default_mixture(

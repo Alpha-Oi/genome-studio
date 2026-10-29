@@ -19,6 +19,7 @@ def test_hamming_one():
 
 def test_hamming_length_mismatch():
     import pytest
+
     with pytest.raises(ValueError):
         hamming("ACGT", "ACG")
 
@@ -80,6 +81,7 @@ def test_off_target_risk_near_miss():
 
 
 # --- API ------------------------------------------------------------------
+
 
 def test_offtarget_api_endpoint():
     from fastapi.testclient import TestClient

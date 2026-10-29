@@ -13,10 +13,10 @@ from dataclasses import dataclass
 class PamHit:
     """One PAM hit."""
 
-    position: int          # 0-based, index of PAM start (N in NGG)
-    strand: str            # "+" or "-"
-    pam: str               # actual PAM sequence (e.g., "AGG", "TGG")
-    spacer: str            # 20 nt spacer (5'->3' on + strand)
+    position: int  # 0-based, index of PAM start (N in NGG)
+    strand: str  # "+" or "-"
+    pam: str  # actual PAM sequence (e.g., "AGG", "TGG")
+    spacer: str  # 20 nt spacer (5'->3' on + strand)
 
 
 def _revcomp(seq: str) -> str:
@@ -52,12 +52,14 @@ def find_pam_sites(
         n_base = seq[pam_start]
         pam_tail = seq[pam_start + 1 : pam_start + 1 + len(pam_suffix)]
         if n_base in "ACGT" and pam_tail == pam_suffix:
-            hits.append(PamHit(
-                position=pam_start,
-                strand="+",
-                pam=n_base + pam_tail,
-                spacer=seq[i:pam_start],
-            ))
+            hits.append(
+                PamHit(
+                    position=pam_start,
+                    strand="+",
+                    pam=n_base + pam_tail,
+                    spacer=seq[i:pam_start],
+                )
+            )
 
     if both_strands:
         rc = _revcomp(seq)
@@ -67,12 +69,14 @@ def find_pam_sites(
             pam_tail = rc[pam_start + 1 : pam_start + 1 + len(pam_suffix)]
             if n_base in "ACGT" and pam_tail == pam_suffix:
                 orig_pos = len(seq) - 1 - pam_start
-                hits.append(PamHit(
-                    position=orig_pos,
-                    strand="-",
-                    pam=n_base + pam_tail,
-                    spacer=rc[i:pam_start],
-                ))
+                hits.append(
+                    PamHit(
+                        position=orig_pos,
+                        strand="-",
+                        pam=n_base + pam_tail,
+                        spacer=rc[i:pam_start],
+                    )
+                )
 
     hits.sort(key=lambda h: (h.position, h.strand))
     return hits

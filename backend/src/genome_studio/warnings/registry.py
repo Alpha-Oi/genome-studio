@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +21,7 @@ class WarningError(ValueError):
 
 
 # --- Create --------------------------------------------------------------
+
 
 async def create_warning(
     session: AsyncSession,
@@ -72,6 +73,7 @@ async def create_warning(
 
 # --- Read ----------------------------------------------------------------
 
+
 async def list_warnings(
     session: AsyncSession,
     project_id: int,
@@ -96,6 +98,7 @@ async def get_warning(session: AsyncSession, warning_id: int) -> Warning:
 
 # --- Acknowledge ---------------------------------------------------------
 
+
 async def acknowledge_warning(
     session: AsyncSession,
     warning_id: int,
@@ -112,7 +115,7 @@ async def acknowledge_warning(
 
     w.status = WarningStatus.ACKNOWLEDGED.value
     w.acknowledged_by = by
-    w.acknowledged_at = datetime.now(timezone.utc)
+    w.acknowledged_at = datetime.now(UTC)
     w.acknowledgment_note = note.strip()
     await session.commit()
     await session.refresh(w)

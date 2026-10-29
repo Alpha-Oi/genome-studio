@@ -64,11 +64,13 @@ def simulate_ngs(
         else:
             reads = round(total_reads * a.fraction)
             remaining -= reads
-        counts.append(NgsAlleleCount(
-            name=a.name,
-            fraction=a.fraction,
-            reads=reads,
-            sequence=a.sequence,
-        ))
+        counts.append(
+            NgsAlleleCount(
+                name=a.name,
+                fraction=a.fraction,
+                reads=reads,
+                sequence=a.sequence,
+            )
+        )
 
     return NgsSummary(total_reads=total_reads, alleles=counts)

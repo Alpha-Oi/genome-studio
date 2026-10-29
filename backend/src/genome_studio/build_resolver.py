@@ -86,7 +86,7 @@ def _is_isolated() -> bool:
     try:
         with socket.create_connection(("1.1.1.1", 53), timeout=0.5):
             return False
-    except (OSError, socket.timeout):
+    except (TimeoutError, OSError):
         return True
 
 

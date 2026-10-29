@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-
 from genome_studio.api.app import create_app
 from genome_studio.simulation import (
     Allele,
@@ -15,8 +14,8 @@ from genome_studio.simulation import (
     validate_mixture,
 )
 
-
 # --- mixture ------------------------------------------------------------
+
 
 def test_default_mixture_70_30():
     wt = "ACGT" * 10
@@ -59,6 +58,7 @@ def test_validate_mixture_bad_lengths():
 
 # --- sanger -------------------------------------------------------------
 
+
 def test_sanger_homozygous():
     wt = "A" * 20
     edited = "T" * 20
@@ -98,6 +98,7 @@ def test_sanger_window():
 
 # --- ngs ----------------------------------------------------------------
 
+
 def test_ngs_counts():
     alleles = [
         Allele("wt", 0.7, "A" * 10),
@@ -124,6 +125,7 @@ def test_ngs_rounds():
 
 # --- API ----------------------------------------------------------------
 
+
 def _seqs():
     # same length, differ at one position
     wt = "ATG" + "GCT" * 5 + "TAA"
@@ -135,6 +137,7 @@ def _seqs():
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
     from genome_studio.data import db as _db
+
     _db._engine = None
     _db._session_factory = None
     app = create_app()

@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
-
 from genome_studio.intent.goal import (
     Constraint,
     Direction,
@@ -14,6 +12,7 @@ from genome_studio.intent.goal import (
     PhenotypeTarget,
     Target,
 )
+from pydantic import ValidationError
 
 
 def test_target_valid():
@@ -49,9 +48,7 @@ def test_goal_full():
         raw_text="increase expression of gene lacZ in E. coli",
         intent=GoalIntent.INCREASE_EXPRESSION,
         target=Target(gene="lacZ", organism=Organism.E_COLI),
-        phenotype_target=PhenotypeTarget(
-            metric="protein_yield", direction=Direction.UP
-        ),
+        phenotype_target=PhenotypeTarget(metric="protein_yield", direction=Direction.UP),
         constraints=(Constraint.DO_NOT_MODIFY_CDS,),
         confidence=0.9,
     )

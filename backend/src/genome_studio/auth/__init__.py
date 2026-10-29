@@ -24,9 +24,9 @@ from genome_studio.auth.modes import (
 )
 
 __all__ = [
+    "LOCAL_USER",
     "AppMode",
     "User",
-    "LOCAL_USER",
-    "resolve_mode",
     "get_current_user",
+    "resolve_mode",
 ]

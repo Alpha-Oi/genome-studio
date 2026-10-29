@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from genome_studio.crispr.pam import find_pam_sites
 from genome_studio.crispr.scoring import score_guide
@@ -12,12 +12,12 @@ from genome_studio.crispr.scoring import score_guide
 class Guide:
     """Candidate guide RNA."""
 
-    spacer: str              # 20 nt
-    pam: str                 # e.g., "AGG"
-    position: int            # 0-based position of PAM on + strand
-    strand: str              # "+" or "-"
+    spacer: str  # 20 nt
+    pam: str  # e.g., "AGG"
+    position: int  # 0-based position of PAM on + strand
+    strand: str  # "+" or "-"
     gc_content: float
-    score: float             # 0..1
+    score: float  # 0..1
     reasons: tuple[str, ...] = ()
     warnings: tuple[str, ...] = ()
 
@@ -68,16 +68,18 @@ def design_guides(
         if s["score"] < min_score:
             continue
 
-        guides.append(Guide(
-            spacer=h.spacer,
-            pam=h.pam,
-            position=h.position,
-            strand=h.strand,
-            gc_content=_gc(h.spacer),
-            score=s["score"],
-            reasons=tuple(s["reasons"]),
-            warnings=tuple(s["warnings"]),
-        ))
+        guides.append(
+            Guide(
+                spacer=h.spacer,
+                pam=h.pam,
+                position=h.position,
+                strand=h.strand,
+                gc_content=_gc(h.spacer),
+                score=s["score"],
+                reasons=tuple(s["reasons"]),
+                warnings=tuple(s["warnings"]),
+            )
+        )
 
     guides.sort(key=lambda g: g.score, reverse=True)
     return guides[:top_n]

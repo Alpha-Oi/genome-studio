@@ -5,10 +5,9 @@ VCF 4.2 format. Coordinates are 1-based on the + strand.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from genome_studio.simulation.edit import Edit, EditKind
-
 
 VCF_HEADER = """##fileformat=VCFv4.2
 ##fileDate={date}
@@ -38,7 +37,7 @@ def edit_to_vcf(
     Returns:
         VCF string.
     """
-    date = datetime.now(timezone.utc).strftime("%Y%m%d")
+    date = datetime.now(UTC).strftime("%Y%m%d")
     header = VCF_HEADER.format(date=date, ref_len=ref_len)
 
     pos_1based = edit.position + 1
@@ -59,14 +58,16 @@ def edit_to_vcf(
 
     info = f"GS_EDIT_KIND={edit.kind.value};GS_GENE={gene_name}"
 
-    row = "\t".join([
-        contig,
-        str(pos_1based),
-        ".",
-        ref_field,
-        alt_field,
-        ".",
-        "PASS",
-        info,
-    ])
+    row = "\t".join(
+        [
+            contig,
+            str(pos_1based),
+            ".",
+            ref_field,
+            alt_field,
+            ".",
+            "PASS",
+            info,
+        ]
+    )
     return header + row + "\n"

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
@@ -12,15 +12,15 @@ from genome_studio.data.db import Base
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class WarningLevel(str, Enum):
     """Three tiers, per docs/07-policy-security.md."""
 
-    T0_SCIENCE = "T0_science"           # essentiality, off-target, toxicity
-    T1_BIOSEC = "T1_biosec"             # DURC, pathogen
-    T2_LEGAL = "T2_legal"               # always-on, never disable
+    T0_SCIENCE = "T0_science"  # essentiality, off-target, toxicity
+    T1_BIOSEC = "T1_biosec"  # DURC, pathogen
+    T2_LEGAL = "T2_legal"  # always-on, never disable
 
 
 class WarningSeverity(str, Enum):
@@ -61,9 +61,7 @@ class Warning(Base):
         String(16), default=WarningStatus.OPEN.value, nullable=False
     )
     acknowledged_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    acknowledged_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     acknowledgment_note: Mapped[str] = mapped_column(Text, default="", nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
@@ -72,6 +70,7 @@ class Warning(Base):
 
     def to_dict(self) -> dict:
         import json
+
         try:
             evidence = json.loads(self.evidence_json)
         except Exception:
@@ -87,9 +86,7 @@ class Warning(Base):
             "evidence": evidence,
             "status": self.status,
             "acknowledged_by": self.acknowledged_by,
-            "acknowledged_at": (
-                self.acknowledged_at.isoformat() if self.acknowledged_at else None
-            ),
+            "acknowledged_at": (self.acknowledged_at.isoformat() if self.acknowledged_at else None),
             "acknowledgment_note": self.acknowledgment_note,
             "created_at": self.created_at.isoformat(),
         }

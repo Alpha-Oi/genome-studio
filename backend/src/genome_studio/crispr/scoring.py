@@ -23,10 +23,7 @@ def has_polyt(seq: str, run: int = 4) -> bool:
 def has_homopolymer(seq: str, run: int = 5) -> bool:
     """True if sequence has a homopolymer run of length >= run."""
     seq = seq.upper()
-    for base in "ACGT":
-        if base * run in seq:
-            return True
-    return False
+    return any(base * run in seq for base in "ACGT")
 
 
 def score_guide(spacer: str) -> dict:

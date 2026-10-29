@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-
 from genome_studio.api.app import create_app
 
 
@@ -13,6 +12,7 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
     # reset global singletons so each test uses its own DB
     from genome_studio.data import db as _db
+
     _db._engine = None
     _db._session_factory = None
     app = create_app()

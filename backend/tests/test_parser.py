@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from genome_studio.intent.goal import Constraint, Direction, GoalIntent, Organism
 from genome_studio.intent.parser import ParseError, parse_goal
 

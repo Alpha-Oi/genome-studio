@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-
 from genome_studio.api.app import create_app
 from genome_studio.io.fasta import FastaError, parse_fasta
 
-
 # --- parser -------------------------------------------------------------
+
 
 def test_parse_single_record():
     text = ">gene1 description here\nACGTACGT\nACGTACGT\n"
@@ -23,11 +22,7 @@ def test_parse_single_record():
 
 
 def test_parse_multi_records():
-    text = (
-        ">seq1\nACGTACGT\n"
-        ">seq2 some desc\nTTTTGGGG\n"
-        ">seq3\nAAAACCCC\n"
-    )
+    text = ">seq1\nACGTACGT\n>seq2 some desc\nTTTTGGGG\n>seq3\nAAAACCCC\n"
     records = parse_fasta(text)
     assert len(records) == 3
     assert records[0].name == "seq1"
@@ -81,10 +76,12 @@ def test_to_dict():
 
 # --- API ----------------------------------------------------------------
 
+
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
     from genome_studio.data import db as _db
+
     _db._engine = None
     _db._session_factory = None
     app = create_app()

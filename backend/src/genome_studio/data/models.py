@@ -39,7 +39,7 @@ Experiment (Фаза C1, опционально):
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -48,7 +48,7 @@ from genome_studio.data.db import Base
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Project(Base):
@@ -70,7 +70,7 @@ class Project(Base):
         DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False
     )
 
-    experiments: Mapped[list["Experiment"]] = relationship(
+    experiments: Mapped[list[Experiment]] = relationship(
         back_populates="project",
         cascade="all, delete-orphan",
         order_by="Experiment.created_at",
@@ -114,6 +114,7 @@ class Experiment(Base):
 
     def to_dict(self) -> dict:
         import json
+
         try:
             payload = json.loads(self.payload_json)
         except Exception:

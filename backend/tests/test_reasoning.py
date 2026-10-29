@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from genome_studio.intent.parser import parse_goal
 from genome_studio.knowledge.seed import build_default_kg
 from genome_studio.reasoning.mapper import map_goal
@@ -23,6 +22,7 @@ def test_kg_has_ecoli_lacz(kg):
 
 def test_kg_laci_inhibits_lacz(kg):
     from genome_studio.knowledge.graph import RelationType
+
     edges = kg.outgoing("ecoli.lacI", RelationType.INHIBITS)
     assert any(e.target == "ecoli.lacZ" for e in edges)
 
@@ -65,6 +65,7 @@ def test_build_plan_for_increase(kg):
 
 def test_do_not_modify_cds_respected(kg):
     from genome_studio.intent.goal import Constraint
+
     goal = parse_goal("modify gene lacZ in E. coli, do not modify CDS")
     assert Constraint.DO_NOT_MODIFY_CDS in goal.constraints
     iset = map_goal(goal, kg)

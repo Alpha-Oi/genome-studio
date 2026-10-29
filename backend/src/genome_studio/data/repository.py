@@ -17,6 +17,7 @@ class NotFoundError(LookupError):
 
 # --- Projects ------------------------------------------------------------
 
+
 async def create_project(
     session: AsyncSession,
     name: str,
@@ -38,9 +39,7 @@ async def list_projects(session: AsyncSession) -> list[Project]:
 
 async def get_project(session: AsyncSession, project_id: int) -> Project:
     stmt = (
-        select(Project)
-        .where(Project.id == project_id)
-        .options(selectinload(Project.experiments))
+        select(Project).where(Project.id == project_id).options(selectinload(Project.experiments))
     )
     result = await session.execute(stmt)
     p = result.scalar_one_or_none()
@@ -77,6 +76,7 @@ async def update_project(
 
 # --- Experiments ---------------------------------------------------------
 
+
 async def create_experiment(
     session: AsyncSession,
     project_id: int,
@@ -98,9 +98,7 @@ async def create_experiment(
     return e
 
 
-async def list_experiments(
-    session: AsyncSession, project_id: int
-) -> list[Experiment]:
+async def list_experiments(session: AsyncSession, project_id: int) -> list[Experiment]:
     stmt = (
         select(Experiment)
         .where(Experiment.project_id == project_id)

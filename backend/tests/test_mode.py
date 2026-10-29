@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-
 from genome_studio.api.app import create_app
-from genome_studio.auth import AppMode, LOCAL_USER, User, resolve_mode
+from genome_studio.auth import LOCAL_USER, AppMode, User, resolve_mode
 from genome_studio.auth.dependencies import get_current_user
 
 
@@ -14,6 +13,7 @@ from genome_studio.auth.dependencies import get_current_user
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
     from genome_studio.data import db as _db
+
     _db._engine = None
     _db._session_factory = None
     app = create_app()
@@ -24,6 +24,7 @@ def client(tmp_path, monkeypatch):
 
 
 # --- resolve_mode -------------------------------------------------------
+
 
 def test_default_mode_is_local(monkeypatch):
     monkeypatch.delenv("GS_MODE", raising=False)
@@ -42,6 +43,7 @@ def test_resolve_mode_bad_value_falls_back_to_local(monkeypatch):
 
 # --- User / LOCAL_USER --------------------------------------------------
 
+
 def test_local_user_is_local():
     assert LOCAL_USER.is_local
     assert LOCAL_USER.id == 0
@@ -55,6 +57,7 @@ def test_user_from_id_is_not_local():
 
 # --- get_current_user ---------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_get_current_user_returns_local(monkeypatch):
     monkeypatch.setenv("GS_MODE", "local")
@@ -63,6 +66,7 @@ async def test_get_current_user_returns_local(monkeypatch):
 
 
 # --- API ----------------------------------------------------------------
+
 
 def test_mode_endpoint_local(client):
     r = client.get("/mode")

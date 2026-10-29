@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field
 
 from genome_studio.io.fasta import FastaError, parse_fasta
 
-
 router = APIRouter(tags=["parse"])
 
 

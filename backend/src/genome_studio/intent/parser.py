@@ -139,10 +139,15 @@ def parse_goal(text: str) -> Goal:
     direction = _match_direction(text)
     phenotype: PhenotypeTarget | None = None
     if direction is not None:
-        metric = "protein_yield" if intent in (
-            GoalIntent.INCREASE_EXPRESSION,
-            GoalIntent.DECREASE_EXPRESSION,
-        ) else "phenotype"
+        metric = (
+            "protein_yield"
+            if intent
+            in (
+                GoalIntent.INCREASE_EXPRESSION,
+                GoalIntent.DECREASE_EXPRESSION,
+            )
+            else "phenotype"
+        )
         phenotype = PhenotypeTarget(metric=metric, direction=direction)
 
     constraints = _extract_constraints(text)

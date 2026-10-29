@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-
 from genome_studio.api.app import create_app
 from genome_studio.export import edit_to_vcf, to_fasta, to_genbank
 from genome_studio.simulation import Edit, EditKind
@@ -14,6 +13,7 @@ from genome_studio.simulation import Edit, EditKind
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
     from genome_studio.data import db as _db
+
     _db._engine = None
     _db._session_factory = None
     app = create_app()
@@ -24,6 +24,7 @@ def client(tmp_path, monkeypatch):
 
 
 # --- FASTA --------------------------------------------------------------
+
 
 def test_fasta_basic():
     out = to_fasta("ACGTACGT", header="test")
@@ -44,6 +45,7 @@ def test_fasta_wrap():
 
 # --- VCF ----------------------------------------------------------------
 
+
 def test_vcf_substitution():
     edit = Edit(EditKind.SUBSTITUTION, 5, "T", "C")
     vcf = edit_to_vcf(edit, ref_len=100, gene_name="lacZ")
@@ -63,7 +65,7 @@ def test_vcf_substitution():
 def test_vcf_deletion():
     edit = Edit(EditKind.DELETION, 10, "ACGT", "")
     vcf = edit_to_vcf(edit, ref_len=100, gene_name="g")
-    data = [ln for ln in vcf.split("\n") if not ln.startswith("#")][0]
+    data = next(ln for ln in vcf.split("\n") if not ln.startswith("#"))
     cols = data.split("\t")
     assert cols[1] == "11"
     assert cols[3] == "ACGT"
@@ -73,13 +75,14 @@ def test_vcf_deletion():
 def test_vcf_insertion():
     edit = Edit(EditKind.INSERTION, 10, "", "ACGT")
     vcf = edit_to_vcf(edit, ref_len=100, gene_name="g")
-    data = [ln for ln in vcf.split("\n") if not ln.startswith("#")][0]
+    data = next(ln for ln in vcf.split("\n") if not ln.startswith("#"))
     cols = data.split("\t")
     assert cols[1] == "11"
     assert cols[4] == "ACGT"
 
 
 # --- GenBank ------------------------------------------------------------
+
 
 def test_genbank_basic():
     seq = "ATGGCTTAA"
@@ -101,6 +104,7 @@ def test_genbank_origin_has_groups():
 
 
 # --- API ----------------------------------------------------------------
+
 
 def _seq():
     return "ATG" + "GCT" * 20 + "TAA"

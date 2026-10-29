@@ -15,12 +15,12 @@ class ConsequenceNode:
     """One node in the consequence tree."""
 
     node_id: str
-    type: str                # "transcript", "protein", "pathway", "phenotype"
+    type: str  # "transcript", "protein", "pathway", "phenotype"
     description: str
-    confidence: float        # 0..1
+    confidence: float  # 0..1
     method: str = "rule-based"
     evidence: tuple[str, ...] = ()
-    children: list["ConsequenceNode"] = field(default_factory=list)
+    children: list[ConsequenceNode] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {

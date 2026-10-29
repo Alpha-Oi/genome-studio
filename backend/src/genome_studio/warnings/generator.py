@@ -118,8 +118,7 @@ async def warnings_from_effect(
             severity=WarningSeverity.MEDIUM,
             type="premature_stop",
             message=(
-                f"Premature stop codon in {gene_name!r}: likely loss-of-function "
-                "and possible NMD."
+                f"Premature stop codon in {gene_name!r}: likely loss-of-function and possible NMD."
             ),
             evidence=[effect.description],
             experiment_id=experiment_id,

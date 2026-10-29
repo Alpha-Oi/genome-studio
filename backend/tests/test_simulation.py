@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from genome_studio.simulation import (
     Edit,
     EditError,
@@ -16,8 +15,8 @@ from genome_studio.simulation import (
 )
 from genome_studio.simulation.effects import EffectType
 
-
 # --- edit -----------------------------------------------------------------
+
 
 def test_apply_substitution():
     seq = "ACGTACGT"
@@ -51,6 +50,7 @@ def test_apply_deletion_mismatch():
 
 # --- translate / orf ------------------------------------------------------
 
+
 def test_translate_simple():
     # ATG = M, GCT = A, TAA = *
     assert translate("ATGGCTTAA") == "MA*"
@@ -66,6 +66,7 @@ def test_find_orfs_simple():
 
 
 # --- effects --------------------------------------------------------------
+
 
 def _make_orf(start_offset: int = 0, n_codons: int = 20) -> str:
     """Build DNA with one clean ORF."""
@@ -126,6 +127,7 @@ def test_effect_in_frame_indel():
 
 # --- consequence tree -----------------------------------------------------
 
+
 def test_consequence_tree_structure():
     seq = _make_orf()
     edit = Edit(EditKind.INSERTION, 5, "", "A")
@@ -157,6 +159,7 @@ def test_consequence_tree_to_dict():
 
 
 # --- API ------------------------------------------------------------------
+
 
 def test_simulate_api_substitution():
     from fastapi.testclient import TestClient

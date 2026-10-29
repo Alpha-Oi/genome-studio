@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-
 from genome_studio.api.app import create_app
 from genome_studio.report import build_project_pdf
 
@@ -21,6 +20,7 @@ def _make_project() -> dict:
 
 
 # --- Direct PDF build ---------------------------------------------------
+
 
 def test_build_pdf_empty():
     pdf = build_project_pdf(
@@ -95,10 +95,12 @@ def test_build_pdf_with_warnings():
 
 # --- API ----------------------------------------------------------------
 
+
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
     from genome_studio.data import db as _db
+
     _db._engine = None
     _db._session_factory = None
     app = create_app()

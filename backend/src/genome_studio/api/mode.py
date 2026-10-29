@@ -10,7 +10,6 @@ from fastapi import APIRouter, Depends
 
 from genome_studio.auth import User, get_current_user, resolve_mode
 
-
 router = APIRouter(tags=["mode"])
 
 

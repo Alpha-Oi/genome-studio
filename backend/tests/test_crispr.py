@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import pytest
-
 from genome_studio.crispr.designer import design_guides
 from genome_studio.crispr.pam import find_pam_sites
 from genome_studio.crispr.scoring import gc_content, has_homopolymer, has_polyt, score_guide
 
-
 # --- pam.py ---------------------------------------------------------------
+
 
 def test_find_pam_basic():
     # spacer(20) + N + GG
@@ -45,6 +43,7 @@ def test_find_pam_multiple():
 
 
 # --- scoring.py -----------------------------------------------------------
+
 
 def test_gc_content():
     assert gc_content("GCGC") == 1.0
@@ -82,13 +81,16 @@ def test_score_polyt_warning():
 
 # --- designer.py ----------------------------------------------------------
 
+
 def test_design_guides_from_sequence():
     # Build sequence with 2 PAM sites, well-spaced, good GC
     seq = (
         "ACGTACGTACGTACGTACGT"  # 20 nt spacer 1
-        + "C" + "GG"             # PAM 1
-        + "GGGGCCCCGGGGCCCCGGGG" # filler (good GC)
-        + "A" + "GG"             # PAM 2
+        + "C"
+        + "GG"  # PAM 1
+        + "GGGGCCCCGGGGCCCCGGGG"  # filler (good GC)
+        + "A"
+        + "GG"  # PAM 2
         + "TTTTAAAATTTTAAAATTTT"
     )
     guides = design_guides(seq, top_n=5, min_score=0.0)
@@ -112,6 +114,7 @@ def test_design_guides_top_n():
 
 
 # --- API ------------------------------------------------------------------
+
 
 def test_crispr_api_endpoint():
     from fastapi.testclient import TestClient

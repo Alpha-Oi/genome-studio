@@ -11,10 +11,10 @@ from genome_studio.crispr.scoring import score_guide
 
 __all__ = [
     "Guide",
-    "design_guides",
-    "find_pam_sites",
-    "score_guide",
     "OffTargetHit",
+    "design_guides",
     "find_offtargets",
+    "find_pam_sites",
     "off_target_risk",
+    "score_guide",
 ]

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-
 from genome_studio.api.app import create_app
 
 
@@ -12,6 +11,7 @@ from genome_studio.api.app import create_app
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
     from genome_studio.data import db as _db
+
     _db._engine = None
     _db._session_factory = None
     app = create_app()
@@ -46,9 +46,7 @@ def _create_plan(client, project_id, gene, organism, intent):
 
 
 def test_related_empty_when_no_match(client):
-    r = client.get(
-        "/related?gene=lacZ&organism=Escherichia+coli&intent=knockout"
-    )
+    r = client.get("/related?gene=lacZ&organism=Escherichia+coli&intent=knockout")
     assert r.status_code == 200
     assert r.json()["related"] == []
 
@@ -57,9 +55,7 @@ def test_related_finds_exact_match(client):
     pid = client.post("/projects", json={"name": "P1"}).json()["project"]["id"]
     _create_plan(client, pid, "lacZ", "Escherichia coli", "knockout")
 
-    r = client.get(
-        "/related?gene=lacZ&organism=Escherichia+coli&intent=knockout"
-    )
+    r = client.get("/related?gene=lacZ&organism=Escherichia+coli&intent=knockout")
     assert r.status_code == 200
     body = r.json()
     assert len(body["related"]) == 1
@@ -73,9 +69,7 @@ def test_related_ignores_different_gene(client):
     pid = client.post("/projects", json={"name": "P1"}).json()["project"]["id"]
     _create_plan(client, pid, "recA", "Escherichia coli", "knockout")
 
-    r = client.get(
-        "/related?gene=lacZ&organism=Escherichia+coli&intent=knockout"
-    )
+    r = client.get("/related?gene=lacZ&organism=Escherichia+coli&intent=knockout")
     assert r.json()["related"] == []
 
 
@@ -83,9 +77,7 @@ def test_related_ignores_different_intent(client):
     pid = client.post("/projects", json={"name": "P1"}).json()["project"]["id"]
     _create_plan(client, pid, "lacZ", "Escherichia coli", "knockout")
 
-    r = client.get(
-        "/related?gene=lacZ&organism=Escherichia+coli&intent=increase_expression"
-    )
+    r = client.get("/related?gene=lacZ&organism=Escherichia+coli&intent=increase_expression")
     assert r.json()["related"] == []
 
 
@@ -95,9 +87,7 @@ def test_related_returns_multiple(client):
     _create_plan(client, p1, "lacZ", "Escherichia coli", "knockout")
     _create_plan(client, p2, "lacZ", "Escherichia coli", "knockout")
 
-    r = client.get(
-        "/related?gene=lacZ&organism=Escherichia+coli&intent=knockout"
-    )
+    r = client.get("/related?gene=lacZ&organism=Escherichia+coli&intent=knockout")
     assert len(r.json()["related"]) == 2
 
 
@@ -106,7 +96,5 @@ def test_related_limit(client):
     for _ in range(5):
         _create_plan(client, pid, "lacZ", "Escherichia coli", "knockout")
 
-    r = client.get(
-        "/related?gene=lacZ&organism=Escherichia+coli&intent=knockout&limit=2"
-    )
+    r = client.get("/related?gene=lacZ&organism=Escherichia+coli&intent=knockout&limit=2")
     assert len(r.json()["related"]) == 2

@@ -91,9 +91,7 @@ class Goal(BaseModel):
     phenotype_target: PhenotypeTarget | None = Field(
         None, description="Желаемый фенотип (опционально)"
     )
-    constraints: tuple[Constraint, ...] = Field(
-        default_factory=tuple, description="Ограничения"
-    )
+    constraints: tuple[Constraint, ...] = Field(default_factory=tuple, description="Ограничения")
     confidence: Annotated[float, Field(ge=0.0, le=1.0)] = Field(
         1.0, description="Уверенность парсера"
     )

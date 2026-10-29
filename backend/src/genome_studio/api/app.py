@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from typing import Any
-
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,8 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from genome_studio import __version__
 from genome_studio.api.batch import router as batch_router
 from genome_studio.api.mode import router as mode_router
-from genome_studio.api.related import router as related_router
 from genome_studio.api.parse import router as parse_router
+from genome_studio.api.related import router as related_router
 from genome_studio.build_resolver import resolve_build
 from genome_studio.crispr.designer import design_guides
 from genome_studio.crispr.offtarget import find_offtargets, off_target_risk
@@ -55,7 +54,6 @@ from genome_studio.warnings import (
     WarningError,
     WarningStatus,
     acknowledge_warning,
-    get_warning,
     list_warnings,
     warnings_from_effect,
     warnings_from_plan,
@@ -360,7 +358,8 @@ def create_app() -> FastAPI:
 
         try:
             alleles = default_mixture(
-                wt, edited,
+                wt,
+                edited,
                 edited_fraction=req.edited_fraction,
                 heterozygote_fraction=req.heterozygote_fraction,
             )
@@ -399,7 +398,8 @@ def create_app() -> FastAPI:
 
         try:
             alleles = default_mixture(
-                wt, edited,
+                wt,
+                edited,
                 edited_fraction=req.edited_fraction,
                 heterozygote_fraction=req.heterozygote_fraction,
             )
@@ -424,9 +424,7 @@ def create_app() -> FastAPI:
         return Response(
             content=content,
             media_type="text/x-fasta",
-            headers={
-                "Content-Disposition": f'attachment; filename="{req.gene_name}_edited.fasta"'
-            },
+            headers={"Content-Disposition": f'attachment; filename="{req.gene_name}_edited.fasta"'},
         )
 
     @app.post("/export/edit/vcf")
@@ -443,9 +441,7 @@ def create_app() -> FastAPI:
         return Response(
             content=content,
             media_type="text/vcf",
-            headers={
-                "Content-Disposition": f'attachment; filename="{req.gene_name}_edit.vcf"'
-            },
+            headers={"Content-Disposition": f'attachment; filename="{req.gene_name}_edit.vcf"'},
         )
 
     @app.post("/export/edit/genbank")
@@ -467,9 +463,7 @@ def create_app() -> FastAPI:
         return Response(
             content=content,
             media_type="text/plain",
-            headers={
-                "Content-Disposition": f'attachment; filename="{req.gene_name}_edited.gb"'
-            },
+            headers={"Content-Disposition": f'attachment; filename="{req.gene_name}_edited.gb"'},
         )
 
     @app.get("/projects", response_model=ProjectListResponse)
@@ -592,9 +586,7 @@ def create_app() -> FastAPI:
         session: AsyncSession = Depends(get_session),
     ) -> WarningResponse:
         try:
-            w = await acknowledge_warning(
-                session, warning_id, by=req.by, note=req.note
-            )
+            w = await acknowledge_warning(session, warning_id, by=req.by, note=req.note)
         except WarningError as e:
             raise HTTPException(status_code=422, detail=str(e)) from e
         return WarningResponse(warning=w.to_dict())
@@ -618,16 +610,14 @@ def create_app() -> FastAPI:
             warnings=[w.to_dict() for w in warnings],
         )
 
-        safe_name = "".join(
-            c if c.isalnum() or c in "-_" else "_" for c in project.name
-        )[:60] or "project"
+        safe_name = (
+            "".join(c if c.isalnum() or c in "-_" else "_" for c in project.name)[:60] or "project"
+        )
 
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
-            headers={
-                "Content-Disposition": f'attachment; filename="{safe_name}_report.pdf"'
-            },
+            headers={"Content-Disposition": f'attachment; filename="{safe_name}_report.pdf"'},
         )
 
     return app
