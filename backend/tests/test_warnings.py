@@ -206,3 +206,34 @@ def test_filter_by_status(client, pid):
 def test_warning_for_missing_project_404(client):
     r = client.get("/projects/99999/warnings")
     assert r.status_code == 404
+
+
+def test_warning_exposes_target_gene_for_plan(client, pid):
+    client.post(
+        "/goal",
+        json={"text": "knockout gene recA in E. coli", "project_id": pid},
+    )
+    warnings = client.get(f"/projects/{pid}/warnings").json()["warnings"]
+    assert warnings
+    assert all(w["target_gene"] == "recA" for w in warnings)
+
+
+def test_warning_exposes_target_gene_for_simulate(client, pid):
+    seq = "ATG" + "GCT" * 20 + "TAA"
+    r = client.post(
+        "/simulate/edit",
+        json={
+            "sequence": seq,
+            "gene_name": "testGene",
+            "kind": "insertion",
+            "position": 5,
+            "ref": "",
+            "alt": "A",
+            "project_id": pid,
+        },
+    )
+    assert r.status_code == 200
+    warnings = client.get(f"/projects/{pid}/warnings").json()["warnings"]
+    fw = [w for w in warnings if w["type"] == "frameshift"]
+    assert fw
+    assert all(w["target_gene"] == "testGene" for w in fw)

@@ -26,7 +26,6 @@ async def warnings_from_plan(
     created: list[int] = []
     gene = plan.goal.target.gene
 
-    # 1. Essentiality warnings
     all_interventions = list(iset.primary) + list(iset.alternatives)
     for iv in all_interventions:
         if iv.essentiality_risk >= 0.7:
@@ -42,10 +41,10 @@ async def warnings_from_plan(
                 ),
                 evidence=list(iv.warnings) + list(iv.evidence),
                 experiment_id=experiment_id,
+                target_gene=gene,
             )
             created.append(w.id)
 
-    # 2. High off-target risk
     for iv in all_interventions:
         if iv.off_target_risk >= 0.25:
             w = await create_warning(
@@ -60,10 +59,10 @@ async def warnings_from_plan(
                 ),
                 evidence=list(iv.evidence),
                 experiment_id=experiment_id,
+                target_gene=gene,
             )
             created.append(w.id)
 
-    # 3. High complexity note
     for iv in all_interventions:
         if iv.complexity >= 5:
             w = await create_warning(
@@ -77,6 +76,7 @@ async def warnings_from_plan(
                     "Plan extra validation steps."
                 ),
                 experiment_id=experiment_id,
+                target_gene=gene,
             )
             created.append(w.id)
 
@@ -107,6 +107,7 @@ async def warnings_from_effect(
             ),
             evidence=[effect.description],
             experiment_id=experiment_id,
+            target_gene=gene_name,
         )
         created.append(w.id)
 
@@ -122,6 +123,7 @@ async def warnings_from_effect(
             ),
             evidence=[effect.description],
             experiment_id=experiment_id,
+            target_gene=gene_name,
         )
         created.append(w.id)
 
@@ -138,6 +140,7 @@ async def warnings_from_effect(
             ),
             evidence=[effect.description],
             experiment_id=experiment_id,
+            target_gene=gene_name,
         )
         created.append(w.id)
 

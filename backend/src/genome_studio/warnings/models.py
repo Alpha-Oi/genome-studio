@@ -18,9 +18,9 @@ def _utcnow() -> datetime:
 class WarningLevel(str, Enum):
     """Three tiers, per docs/07-policy-security.md."""
 
-    T0_SCIENCE = "T0_science"  # essentiality, off-target, toxicity
-    T1_BIOSEC = "T1_biosec"  # DURC, pathogen
-    T2_LEGAL = "T2_legal"  # always-on, never disable
+    T0_SCIENCE = "T0_science"
+    T1_BIOSEC = "T1_biosec"
+    T2_LEGAL = "T2_legal"
 
 
 class WarningSeverity(str, Enum):
@@ -50,10 +50,11 @@ class Warning(Base):
     experiment_id: Mapped[int | None] = mapped_column(
         ForeignKey("experiments.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    target_gene: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
 
     level: Mapped[str] = mapped_column(String(16), nullable=False)
     severity: Mapped[str] = mapped_column(String(16), nullable=False)
-    type: Mapped[str] = mapped_column(String(64), nullable=False)  # essential_gene_knockout, ...
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     evidence_json: Mapped[str] = mapped_column(Text, default="[]", nullable=False)
 
@@ -79,6 +80,7 @@ class Warning(Base):
             "id": self.id,
             "project_id": self.project_id,
             "experiment_id": self.experiment_id,
+            "target_gene": self.target_gene,
             "level": self.level,
             "severity": self.severity,
             "type": self.type,

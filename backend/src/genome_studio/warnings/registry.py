@@ -20,9 +20,6 @@ class WarningError(ValueError):
     """Invalid warning operation."""
 
 
-# --- Create --------------------------------------------------------------
-
-
 async def create_warning(
     session: AsyncSession,
     *,
@@ -33,12 +30,13 @@ async def create_warning(
     message: str,
     evidence: list[str] | None = None,
     experiment_id: int | None = None,
+    target_gene: str | None = None,
     dedupe: bool = True,
 ) -> Warning:
     """Create a new warning attached to a project.
 
     If dedupe is True and there is already an open warning with the same
-    (project_id, type, message) - returns the existing one instead of
+    (project_id, type, target_gene) - returns the existing one instead of
     creating a duplicate.
     """
     if dedupe:
@@ -47,7 +45,7 @@ async def create_warning(
             .where(
                 Warning.project_id == project_id,
                 Warning.type == type,
-                Warning.message == message,
+                Warning.target_gene == target_gene,
                 Warning.status == WarningStatus.OPEN.value,
             )
             .limit(1)
@@ -59,6 +57,7 @@ async def create_warning(
     w = Warning(
         project_id=project_id,
         experiment_id=experiment_id,
+        target_gene=target_gene,
         level=level.value,
         severity=severity.value,
         type=type,
@@ -69,9 +68,6 @@ async def create_warning(
     await session.commit()
     await session.refresh(w)
     return w
-
-
-# --- Read ----------------------------------------------------------------
 
 
 async def list_warnings(
@@ -94,9 +90,6 @@ async def get_warning(session: AsyncSession, warning_id: int) -> Warning:
     if w is None:
         raise WarningError(f"warning {warning_id} not found")
     return w
-
-
-# --- Acknowledge ---------------------------------------------------------
 
 
 async def acknowledge_warning(
