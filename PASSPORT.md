@@ -170,8 +170,8 @@
 | ~~P0.1~~ | ~~Alembic миграции~~ ЗАКРЫТО (initial migration bd97b6f9018f) | ~~2 ч~~ | Готово |
 | P0.2 | Engine DI через app.state + conftest | 1 ч | Сейчас глобал _engine, тесты хрупкие, xdist не работает |
 | ~~P0.4~~ | ~~Валидация payload~~ ЗАКРЫТО (payload.py, max 100KB / depth 10 / no null) | ~~30 мин~~ | Готово |
-| P0.5 | Rate limiting (slowapi) | 1 ч | 100 req/min per IP |
-| P0.6 | Дедуп warnings по target_gene + kind | 1 ч | Сейчас по message — при рефакторинге схлопнется не то |
+| ~~P0.5~~ | ~~Rate limiting~~ ЗАКРЫТО (slowapi, batch 10/min, crispr 30/min, simulate 60/min, report 10/min, disabled в local) | ~~1 ч~~ | Готово |
+| ~~P0.6~~ | ~~Дедуп warnings по target_gene + kind~~ ЗАКРЫТО (ключ `(project_id, type, target_gene)`, миграция `50f284c25923`) | ~~1 ч~~ | Готово |
 | P1.2 | Разнести app.py (700 строк) на APIRouter | 1 ч | Читаемость |
 
 ### После P0 — можно деплоить
@@ -192,6 +192,8 @@
 ---
 
 ## 8. Известные грабли
+
+- Не выполняй Python-код в PowerShell: правь файлы через here-string `@'...'@` или редактор. `alembic revision --autogenerate` поверх уже применённой миграции создаёт пустой дубликат — удаляй его, не заполняй.
 
 ### Окружение Windows
 
@@ -370,5 +372,5 @@
 - Оценка: 8/10 (было 6.0/10 в начале последней сессии)
 - Git: синхронизирован с origin/main
 - CI: оба workflow зелёные
-- Следующая задача: Engine DI через app.state (P0.2, ~1 час)
+- Следующая задача: P1.2 (разнести `app.py` на роутеры)
 - Долгосрочная цель: multi-user режим (A0 → A1 → B), ML-слой, Alignment
