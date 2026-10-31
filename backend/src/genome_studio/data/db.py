@@ -95,6 +95,7 @@ async def init_db() -> None:
 
     # Production path: run alembic migrations
     import asyncio
+
     from alembic import command
     from alembic.config import Config
 

@@ -20,7 +20,7 @@ testpaths = ["backend/tests"]
 [tool.mypy]
 python_version = "3.12"
 plugins = ["pydantic.mypy"]
-exclude = ['^\.venv/', '^build/', '^dist/', '^node_modules/', '^backend/tests/']
+exclude = ['^\.venv/', '^build/', '^dist/', '^node_modules/', '**/alembic/**', '^backend/tests/']
 
 # Essential checks (не strict, но ловит реальные ошибки)
 warn_return_any = true
