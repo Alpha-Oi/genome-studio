@@ -169,7 +169,7 @@
 |---|---|---|---|
 | ~~P0.1~~ | ~~Alembic миграции~~ ЗАКРЫТО (initial migration bd97b6f9018f) | ~~2 ч~~ | Готово |
 | P0.2 | Engine DI через app.state + conftest | 1 ч | Сейчас глобал _engine, тесты хрупкие, xdist не работает |
-| P0.4 | Валидация payload эксперимента | 30 мин | payload: dict принимает 50 МБ JSON |
+| ~~P0.4~~ | ~~Валидация payload~~ ЗАКРЫТО (payload.py, max 100KB / depth 10 / no null) | ~~30 мин~~ | Готово |
 | P0.5 | Rate limiting (slowapi) | 1 ч | 100 req/min per IP |
 | P0.6 | Дедуп warnings по target_gene + kind | 1 ч | Сейчас по message — при рефакторинге схлопнется не то |
 | P1.2 | Разнести app.py (700 строк) на APIRouter | 1 ч | Читаемость |
