@@ -8,7 +8,7 @@ from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from genome_studio import __version__
@@ -32,6 +32,12 @@ from genome_studio.data import (
     init_db,
     list_experiments,
     list_projects,
+)
+from genome_studio.data.payload import (
+    PayloadNotJsonError,
+    PayloadTooDeepError,
+    PayloadTooLargeError,
+    validate_payload,
 )
 from genome_studio.export import edit_to_vcf, to_fasta, to_genbank
 from genome_studio.intent.parser import ParseError, parse_goal
@@ -148,6 +154,14 @@ class ExperimentCreate(BaseModel):
     kind: str = Field(..., min_length=1, max_length=64)
     title: str = Field("", max_length=300)
     payload: dict = Field(default_factory=dict)
+
+    @field_validator("payload")
+    @classmethod
+    def _validate_payload(cls, v: dict) -> dict:
+        try:
+            return validate_payload(v)
+        except (PayloadTooLargeError, PayloadTooDeepError, PayloadNotJsonError) as e:
+            raise ValueError(str(e)) from e
 
 
 class ExperimentResponse(BaseModel):
