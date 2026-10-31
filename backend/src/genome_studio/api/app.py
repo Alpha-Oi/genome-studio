@@ -15,6 +15,7 @@ from genome_studio import __version__
 from genome_studio.api.batch import router as batch_router
 from genome_studio.api.mode import router as mode_router
 from genome_studio.api.parse import router as parse_router
+from genome_studio.api.rate_limit import setup_rate_limiting
 from genome_studio.api.related import router as related_router
 from genome_studio.build_resolver import resolve_build
 from genome_studio.crispr.designer import design_guides
@@ -225,6 +226,8 @@ def create_app() -> FastAPI:
         redoc_url=None,
         lifespan=lifespan,
     )
+
+    setup_rate_limiting(app)
 
     app.add_middleware(
         CORSMiddleware,

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
+from genome_studio.api.rate_limit import limiter
 from genome_studio.crispr.designer import design_guides
 
 router = APIRouter(tags=["batch"])
@@ -34,7 +35,8 @@ def _clean_dna(seq: str) -> str:
 
 
 @router.post("/batch/design")
-async def batch_design(req: BatchDesignRequest) -> dict:
+@limiter.limit("10/minute")
+async def batch_design(request: Request, req: BatchDesignRequest) -> dict:
     results: list[BatchDesignResult] = []
 
     for item in req.sequences:
