@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from genome_studio.simulation import (
     Edit,
     EditError,
@@ -161,13 +162,20 @@ def test_consequence_tree_to_dict():
 # --- API ------------------------------------------------------------------
 
 
-def test_simulate_api_substitution():
+@pytest.fixture
+def client(tmp_path, monkeypatch):
+    monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
+    monkeypatch.setenv("GS_SKIP_MIGRATIONS", "1")
     from fastapi.testclient import TestClient
+
     from genome_studio.api.app import create_app
 
     app = create_app()
-    client = TestClient(app)
+    with TestClient(app) as c:
+        yield c
 
+
+def test_simulate_api_substitution(client):
     seq = "ATG" + "GCT" * 20 + "TAA"
     r = client.post(
         "/simulate/edit",
@@ -188,13 +196,7 @@ def test_simulate_api_substitution():
     assert "consequence_tree" in body
 
 
-def test_simulate_api_frameshift():
-    from fastapi.testclient import TestClient
-    from genome_studio.api.app import create_app
-
-    app = create_app()
-    client = TestClient(app)
-
+def test_simulate_api_frameshift(client):
     seq = "ATG" + "GCT" * 20 + "TAA"
     r = client.post(
         "/simulate/edit",
@@ -212,12 +214,7 @@ def test_simulate_api_frameshift():
     assert body["effect"]["effect_type"] == "frameshift"
 
 
-def test_simulate_api_bad_kind():
-    from fastapi.testclient import TestClient
-    from genome_studio.api.app import create_app
-
-    app = create_app()
-    client = TestClient(app)
+def test_simulate_api_bad_kind(client):
     r = client.post(
         "/simulate/edit",
         json={

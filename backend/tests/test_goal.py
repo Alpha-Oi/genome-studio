@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
+
 from genome_studio.intent.goal import (
     Constraint,
     Direction,
@@ -12,7 +14,6 @@ from genome_studio.intent.goal import (
     PhenotypeTarget,
     Target,
 )
-from pydantic import ValidationError
 
 
 def test_target_valid():

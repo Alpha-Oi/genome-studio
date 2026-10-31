@@ -55,12 +55,14 @@ select = ["E", "W", "F", "I", "N", "UP", "B", "C4", "SIM", "RUF"]
 ignore = [
     "E501",     # line length handled by formatter
     "B008",     # function call in default arg (FastAPI Depends)
-    "RUF001",   # ambiguous unicode in string — Cyrillic is intentional
-    "RUF002",   # ambiguous unicode in docstring — Cyrillic is intentional
-    "RUF003",   # ambiguous unicode in comment — Cyrillic is intentional
-    "UP042",    # str+Enum is valid; StrEnum migration is a separate task
+    "RUF001",   # ambiguous unicode in string - Cyrillic intentional
+    "RUF002",   # ambiguous unicode in docstring - Cyrillic intentional
+    "RUF003",   # ambiguous unicode in comment - Cyrillic intentional
+    "UP042",    # str+Enum is valid; StrEnum migration is separate
 ]
 
+[tool.ruff.lint.isort]
+known-first-party = ["genome_studio"]
 [tool.ruff.lint.per-file-ignores]
 "backend/tests/**" = ["N806"]  # gene/protein names like lacI, GAL4 are valid
 

@@ -2,8 +2,9 @@
 
 from genome_studio.data.db import (
     Base,
-    dispose_engine,
-    get_engine,
+    create_engine,
+    create_session_factory,
+    get_database_url,
     get_session,
     init_db,
 )
@@ -25,12 +26,13 @@ __all__ = [
     "Experiment",
     "NotFoundError",
     "Project",
+    "create_engine",
     "create_experiment",
     "create_project",
+    "create_session_factory",
     "delete_experiment",
     "delete_project",
-    "dispose_engine",
-    "get_engine",
+    "get_database_url",
     "get_project",
     "get_session",
     "init_db",

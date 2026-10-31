@@ -85,6 +85,7 @@ def test_off_target_risk_near_miss():
 
 def test_offtarget_api_endpoint():
     from fastapi.testclient import TestClient
+
     from genome_studio.api.app import create_app
 
     app = create_app()
@@ -111,6 +112,7 @@ def test_offtarget_api_endpoint():
 
 def test_offtarget_api_bad_guide_length():
     from fastapi.testclient import TestClient
+
     from genome_studio.api.app import create_app
 
     app = create_app()

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from genome_studio.intent.parser import parse_goal
 from genome_studio.knowledge.seed import build_default_kg
 from genome_studio.reasoning.mapper import map_goal

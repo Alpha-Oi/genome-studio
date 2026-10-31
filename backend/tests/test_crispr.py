@@ -118,6 +118,7 @@ def test_design_guides_top_n():
 
 def test_crispr_api_endpoint():
     from fastapi.testclient import TestClient
+
     from genome_studio.api.app import create_app
 
     app = create_app()
@@ -137,6 +138,7 @@ def test_crispr_api_endpoint():
 
 def test_crispr_api_short_sequence():
     from fastapi.testclient import TestClient
+
     from genome_studio.api.app import create_app
 
     app = create_app()

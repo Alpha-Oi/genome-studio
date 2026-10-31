@@ -2,21 +2,28 @@
 
 from __future__ import annotations
 
+import pytest
 from fastapi.testclient import TestClient
+
 from genome_studio.api.app import create_app
 
 
-def test_health():
+@pytest.fixture
+def client(tmp_path, monkeypatch):
+    monkeypatch.setenv("GS_DB_PATH", str(tmp_path / "test.db"))
+    monkeypatch.setenv("GS_SKIP_MIGRATIONS", "1")
     app = create_app()
-    client = TestClient(app)
+    with TestClient(app) as c:
+        yield c
+
+
+def test_health(client):
     r = client.get("/health")
     assert r.status_code == 200
     assert r.json()["status"] == "ok"
 
 
-def test_build_info():
-    app = create_app()
-    client = TestClient(app)
+def test_build_info(client):
     r = client.get("/build")
     assert r.status_code == 200
     body = r.json()
@@ -24,9 +31,7 @@ def test_build_info():
     assert body["dev_override_available"] is False
 
 
-def test_goal_endpoint():
-    app = create_app()
-    client = TestClient(app)
+def test_goal_endpoint(client):
     r = client.post("/goal", json={"text": "knockout gene lacZ in E. coli"})
     assert r.status_code == 200
     body = r.json()
@@ -35,16 +40,12 @@ def test_goal_endpoint():
     assert len(body["plan"]["steps"]) >= 4
 
 
-def test_goal_endpoint_bad_input():
-    app = create_app()
-    client = TestClient(app)
+def test_goal_endpoint_bad_input(client):
     r = client.post("/goal", json={"text": "hello world"})
     assert r.status_code == 422
 
 
-def test_goal_endpoint_increase():
-    app = create_app()
-    client = TestClient(app)
+def test_goal_endpoint_increase(client):
     r = client.post("/goal", json={"text": "increase expression of gene lacZ in E. coli"})
     assert r.status_code == 200
     body = r.json()

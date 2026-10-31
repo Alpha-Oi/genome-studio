@@ -10,14 +10,14 @@ import asyncio
 from logging.config import fileConfig
 
 from alembic import context
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 # Register ALL models on Base.metadata (важно для autogenerate)
 from genome_studio.data import models as _data_models  # noqa: F401
 from genome_studio.data.db import Base, get_database_url
 from genome_studio.warnings import models as _warning_models  # noqa: F401
-from sqlalchemy import pool
-from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
 
 config = context.config
 

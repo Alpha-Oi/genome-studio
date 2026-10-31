@@ -21,11 +21,12 @@ from genome_studio.crispr.designer import design_guides
 from genome_studio.crispr.offtarget import find_offtargets, off_target_risk
 from genome_studio.data import (
     NotFoundError,
+    create_engine,
     create_experiment,
     create_project,
+    create_session_factory,
     delete_experiment,
     delete_project,
-    dispose_engine,
     get_project,
     get_session,
     init_db,
@@ -196,9 +197,12 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        await init_db()
+        engine = create_engine()
+        app.state.engine = engine
+        app.state.session_factory = create_session_factory(engine)
+        await init_db(engine)
         yield
-        await dispose_engine()
+        await engine.dispose()
 
     app = FastAPI(
         title="Genome Studio",
