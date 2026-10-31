@@ -157,6 +157,7 @@
 | CI: forbidden-files | regex-баг | glob, работает |
 | CI: --all-extras | тянул 2 ГБ ML | --extra dev |
 | README | "strict mypy" (ложь) | "essential checks" (правда) |
+| Alembic миграции | не было | initial schema bd97b6f9018f + init_db через alembic |
 
 ---
 
@@ -166,7 +167,7 @@
 
 | # | Задача | Время | Зачем |
 |---|---|---|---|
-| P0.1 | Alembic миграции вместо create_all | 2 ч | Без миграций любое изменение модели = потеря данных в prod |
+| ~~P0.1~~ | ~~Alembic миграции~~ ЗАКРЫТО (initial migration bd97b6f9018f) | ~~2 ч~~ | Готово |
 | P0.2 | Engine DI через app.state + conftest | 1 ч | Сейчас глобал _engine, тесты хрупкие, xdist не работает |
 | P0.4 | Валидация payload эксперимента | 30 мин | payload: dict принимает 50 МБ JSON |
 | P0.5 | Rate limiting (slowapi) | 1 ч | 100 req/min per IP |
@@ -369,5 +370,5 @@
 - Оценка: 8/10 (было 6.0/10 в начале последней сессии)
 - Git: синхронизирован с origin/main
 - CI: оба workflow зелёные
-- Следующая задача: Alembic + Engine DI (P0.1 + P0.2, ~3 часа)
+- Следующая задача: Engine DI через app.state (P0.2, ~1 час)
 - Долгосрочная цель: multi-user режим (A0 → A1 → B), ML-слой, Alignment
